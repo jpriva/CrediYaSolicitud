@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8082
 spring:
   application:
     name: "CrediYaSolicitud"
@@ -29,5 +29,17 @@ management:
     health:
       probes:
         enabled: true
+  server:
+    port: 9091
+
 cors:
-  allowed-origins: "http://localhost:4200,http://localhost:8080"
+  allowed-origins: "http://localhost:4200,http://localhost:8082"
+
+springdoc:
+  api-docs:
+    info:
+      title: "Crediya Auth API Microservice"
+      version: "1.0.0"
+      description: "This is the API for Crediya Auth Microservice"
+  swagger-ui:
+    path: /swagger-ui.html
