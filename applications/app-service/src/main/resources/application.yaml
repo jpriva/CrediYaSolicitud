@@ -6,9 +6,19 @@ spring:
     name: CrediYaSolicitud
   devtools:
     add-properties: false
-  h2:
-    console:
-      enabled: true
-      path: /h2
   profiles:
     include:
+  flyway:
+    url: "jdbc:mysql://localhost:3307/solicitudes_db"
+    user: "jpriva"
+    password: "pass12345"
+    locations: "classpath:db/migration"
+    enabled: true
+
+adapters:
+  r2dbc:
+    host: "localhost"
+    port: 3307
+    database: "solicitudes_db"
+    username: "jpriva"
+    password: "pass12345"
