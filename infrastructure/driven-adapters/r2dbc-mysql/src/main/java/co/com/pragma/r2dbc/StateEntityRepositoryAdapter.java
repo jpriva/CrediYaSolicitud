@@ -1,6 +1,7 @@
 package co.com.pragma.r2dbc;
 
 import co.com.pragma.model.state.State;
+import co.com.pragma.model.state.gateways.StateRepository;
 import co.com.pragma.r2dbc.entity.StateEntity;
 import co.com.pragma.r2dbc.helper.ReactiveAdapterOperations;
 import org.reactivecommons.utils.ObjectMapper;
@@ -12,7 +13,7 @@ public class StateEntityRepositoryAdapter extends ReactiveAdapterOperations<
         StateEntity,
         Integer,
         StateEntityRepository
-        > {
+        >  implements StateRepository {
     public StateEntityRepositoryAdapter(StateEntityRepository repository, ObjectMapper mapper) {
         /**
          *  Could be use mapper.mapBuilder if your domain model implement builder pattern
