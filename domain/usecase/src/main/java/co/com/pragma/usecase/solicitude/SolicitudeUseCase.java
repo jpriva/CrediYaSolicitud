@@ -7,7 +7,10 @@ import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.gateways.LoanTypeRepository;
 import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.model.solicitude.Solicitude;
-import co.com.pragma.model.solicitude.exceptions.*;
+import co.com.pragma.model.solicitude.exceptions.LoanTypeNotFoundException;
+import co.com.pragma.model.solicitude.exceptions.SolicitudeException;
+import co.com.pragma.model.solicitude.exceptions.SolicitudeNullException;
+import co.com.pragma.model.solicitude.exceptions.StateNotFoundException;
 import co.com.pragma.model.solicitude.gateways.SolicitudeRepository;
 import co.com.pragma.model.state.State;
 import co.com.pragma.model.state.gateways.StateRepository;
@@ -15,8 +18,6 @@ import co.com.pragma.model.transaction.gateways.TransactionalPort;
 import co.com.pragma.usecase.solicitude.utils.SolicitudeUtils;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
-
-import static co.com.pragma.model.constants.DefaultValues.VALUE_FIELD;
 
 @RequiredArgsConstructor
 public class SolicitudeUseCase {
@@ -59,12 +60,12 @@ public class SolicitudeUseCase {
                 .flatMap(tuple -> {
                     LoanType loanType = tuple.getT1();
                     State state = tuple.getT2();
-                    SolicitudeException exception =SolicitudeUtils.verifySolicitude(solicitude, loanType);
+                    SolicitudeException exception = SolicitudeUtils.verifySolicitude(solicitude, loanType);
                     if (exception != null) {
                         return Mono.error(exception);
                     }
                     Solicitude validatedSolicitude = solicitude.toBuilder().loanType(loanType).state(state).build();
-                    return solicitudeRepository.save(validatedSolicitude).map( savedSolicitude ->
+                    return solicitudeRepository.save(validatedSolicitude).map(savedSolicitude ->
                             solicitude.toBuilder().loanType(loanType).state(state).build()
                     );
                 });

@@ -6,7 +6,7 @@ public class Errors {
 
     private Errors(){}
     public static final String SOLICITUDE_NULL_CODE = "S001";
-    public static final String SOLICITUDE_NULL = "Request is null.";
+    public static final String SOLICITUDE_NULL = "Application is null.";
 
     public static final String REQUIRED_FIELDS_CODE = "S002";
     public static final String REQUIRED_FIELDS = "is a required field and must be provided.";

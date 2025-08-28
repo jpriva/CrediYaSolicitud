@@ -1,7 +1,5 @@
 package co.com.pragma.r2dbc.entity;
 
-import co.com.pragma.model.loantype.LoanType;
-import co.com.pragma.model.state.State;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
@@ -24,7 +22,7 @@ public class SolicitudeEntity {
     private BigDecimal value;
 
     @Column("plazo")
-    private Integer term;
+    private Integer deadline;
 
     @Column("email")
     private String email;

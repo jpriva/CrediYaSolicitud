@@ -5,7 +5,7 @@ public class LogMessages {
 
     public static final String START_SAVING_SOLICITUDE_PROCESS = "Starting save process";
 
-    public static final String INSERT_SOLICITUDE_DB = "Inserting request in database";
+    public static final String INSERT_SOLICITUDE_DB = "Inserting application in database";
 
-    public static final String SAVED_SOLICITUDE = "Request saved successfully";
+    public static final String SAVED_SOLICITUDE = "Application saved successfully";
 }

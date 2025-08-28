@@ -28,8 +28,8 @@ public class SolicitudeUtils {
         if (solicitude.getValue() == null) {
             return new SolicitudeFieldBlankException(DefaultValues.VALUE_FIELD);
         }
-        if (solicitude.getTerm() == null) {
-            return new SolicitudeFieldBlankException(DefaultValues.TERM_FIELD);
+        if (solicitude.getDeadline() == null) {
+            return new SolicitudeFieldBlankException(DefaultValues.DEADLINE_FIELD);
         }
         if (solicitude.getEmail() == null || solicitude.getEmail().isBlank()) {
             return new SolicitudeFieldBlankException(DefaultValues.EMAIL_FIELD);
@@ -41,13 +41,13 @@ public class SolicitudeUtils {
     }
 
     private static SolicitudeException validateFieldsBounds(Solicitude solicitude) {
-        if (solicitude.getTerm() < DefaultValues.MIN_LENGTH_TERM || solicitude.getTerm() > DefaultValues.MAX_LENGTH_TERM) {
-            return new SolicitudeFieldSizeOutOfBounds(DefaultValues.TERM_FIELD);
+        if (solicitude.getDeadline() < DefaultValues.MIN_LENGTH_DEADLINE || solicitude.getDeadline() > DefaultValues.MAX_LENGTH_DEADLINE) {
+            return new SolicitudeFieldSizeOutOfBounds(DefaultValues.DEADLINE_FIELD);
         }
         if (solicitude.getLoanType().getLoanTypeId() < DefaultValues.MIN_LOAN_TYPE) {
             return new SolicitudeFieldSizeOutOfBounds(DefaultValues.LOAN_TYPE_FIELD);
         }
-        if (solicitude.getEmail().length() > DefaultValues.MAX_LENGTH_TERM) {
+        if (solicitude.getEmail().length() > DefaultValues.MAX_LENGTH_DEADLINE) {
             return new SolicitudeFieldSizeOutOfBounds(DefaultValues.EMAIL_FIELD);
         }
         return null;
