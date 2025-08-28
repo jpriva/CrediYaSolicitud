@@ -4,7 +4,6 @@ import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.gateways.LoanTypeRepository;
 import co.com.pragma.r2dbc.mapper.PersistenceLoanTypeMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -21,8 +20,7 @@ public class LoanTypeEntityRepositoryAdapter implements LoanTypeRepository {
     }
 
     @Override
-    public Mono<LoanType> findOne(LoanType example) {
-        return loanTypeRepository.findOne(Example.of(loanTypeMapper.toEntity(example)))
-                .map(loanTypeMapper::toDomain);
+    public Mono<LoanType> findById(Integer loanTypeId) {
+        return loanTypeRepository.findById(loanTypeId).map(loanTypeMapper::toDomain);
     }
 }
