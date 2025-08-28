@@ -1,10 +1,10 @@
 package co.com.pragma.api.dto;
 
+import co.com.pragma.api.constants.Constants;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -15,25 +15,27 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(name = "Loan Application Request", description = "Loan Application Data.")
+@Schema(name = Constants.SOLICITUDE_REQUEST_SCHEMA_NAME, description = Constants.SOLICITUDE_REQUEST_SCHEMA_DESCRIPTION)
 public class SolicitudeRequestDTO {
-    @NotBlank(message = "Value can't be empty")
-    @DecimalMin(value = "1.00", message = "Minimum value depends on loan type")
-    @DecimalMax(value = "999999999999999999.99", message = "Maximum value depends on loan type")
-    @Schema(description = "Loan application's value.", example = "123456.78")
+    @NotNull(message = Constants.VALIDATION_VALUE_NOT_NULL)
+    @DecimalMin(value = "1.00", message = Constants.VALIDATION_VALUE_MIN)
+    @DecimalMax(value = "999999999999999999.99", message = Constants.VALIDATION_VALUE_MAX)
+    @Schema(description = Constants.SOLICITUDE_REQUEST_VALUE_DESCRIPTION, example = Constants.EXAMPLE_SOLICITUDE_VALUE)
     private BigDecimal value;
 
-    @NotBlank(message = "Deadline can't be empty")
-    @DecimalMin(value = "1", message = "Minimum value most be at least 1")
-    @DecimalMax(value = "360", message = "Maximum value most be at least 360 equivalent to 30 years")
-    @Schema(description = "Loan application's deadline in months.", example = "12")
+    @NotNull(message = Constants.VALIDATION_DEADLINE_NOT_NULL)
+    @Min(value = 1, message = Constants.VALIDATION_DEADLINE_MIN)
+    @Max(value = 360, message = Constants.VALIDATION_DEADLINE_MAX)
+    @Schema(description = Constants.SOLICITUDE_REQUEST_DEADLINE_DESCRIPTION, example = Constants.EXAMPLE_SOLICITUDE_DEADLINE)
     private Integer deadline;
 
-    @NotBlank(message = "Email can't be empty")
-    @Schema(description = "User's email", example = "john.doe@example.com")
+    @NotBlank(message = Constants.VALIDATION_EMAIL_NOT_BLANK)
+    @Email(message = Constants.VALIDATION_EMAIL_FORMAT)
+    @Schema(description = Constants.SOLICITUDE_REQUEST_EMAIL_DESCRIPTION, example = Constants.EXAMPLE_EMAIL)
     private String email;
 
-    @NotBlank(message = "Loan Type can't be empty")
-    @Schema(description = "Loan Type.")
+    @NotNull(message = Constants.VALIDATION_LOAN_TYPE_NOT_NULL)
+    @Valid
+    @Schema(description = Constants.SOLICITUDE_REQUEST_LOAN_TYPE_DESCRIPTION)
     private LoanTypeRequestDTO loanType;
 }

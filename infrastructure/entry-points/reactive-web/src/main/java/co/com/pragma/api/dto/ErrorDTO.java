@@ -1,7 +1,6 @@
 package co.com.pragma.api.dto;
 
-import co.com.pragma.api.constants.ApiConstants;
-import co.com.pragma.model.constants.Errors;
+import co.com.pragma.api.constants.Constants;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,19 +14,19 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(name = "Error Response", description = "Error Response")
+@Schema(name = Constants.ERROR_SCHEMA_NAME, description = Constants.ERROR_SCHEMA_DESCRIPTION)
 public class ErrorDTO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-    @Schema(description = "Timestamp", example = "2025-01-01T00:00:00.000Z")
+    @Schema(description = Constants.ERROR_TIMESTAMP_DESCRIPTION, example = Constants.EXAMPLE_ERROR_TIMESTAMP)
     private Instant timestamp;
 
-    @Schema(description = "Error Path", example = ApiConstants.ApiPaths.SOLICITUDE_PATH)
+    @Schema(description = Constants.ERROR_PATH_DESCRIPTION, example = Constants.API_SOLICITUDE_PATH)
     private String path;
 
-    @Schema(description = "Error Code", example = Errors.ERROR_SAVING_SOLICITUDE_CODE)
+    @Schema(description = Constants.ERROR_CODE_DESCRIPTION, example = Constants.EXAMPLE_ERROR_CODE)
     private String code;
 
-    @Schema(description = "Error Message", example = Errors.ERROR_SAVING_SOLICITUDE)
+    @Schema(description = Constants.ERROR_MESSAGE_DESCRIPTION, example = Constants.EXAMPLE_ERROR_MESSAGE)
     private String message;
 }

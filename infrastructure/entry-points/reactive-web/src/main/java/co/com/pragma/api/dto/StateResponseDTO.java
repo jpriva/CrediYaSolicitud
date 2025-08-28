@@ -1,6 +1,6 @@
 package co.com.pragma.api.dto;
 
-import co.com.pragma.model.constants.DefaultValues;
+import co.com.pragma.api.constants.Constants;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -11,12 +11,12 @@ import lombok.*;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(name = "State", description = "State Data.")
+@Schema(name = Constants.STATE_SCHEMA_NAME, description = Constants.STATE_SCHEMA_DESCRIPTION)
 public class StateResponseDTO {
-    @Schema(description = "State identifier", example = "1")
+    @Schema(description = Constants.STATE_ID_DESCRIPTION, example = Constants.EXAMPLE_STATE_ID)
     private Integer stateId;
-    @Schema(description = "State name", example = DefaultValues.PENDING_STATE)
+    @Schema(description = Constants.STATE_NAME_DESCRIPTION, example = Constants.EXAMPLE_STATE_NAME)
     private String name;
-    @Schema(description = "State description", example = "La solicitud está pendiente de revisión.")
+    @Schema(description = Constants.STATE_DESCRIPTION_DESCRIPTION, example = Constants.EXAMPLE_STATE_DESCRIPTION)
     private String description;
 }

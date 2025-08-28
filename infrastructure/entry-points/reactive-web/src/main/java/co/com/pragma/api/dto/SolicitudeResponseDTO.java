@@ -1,5 +1,6 @@
 package co.com.pragma.api.dto;
 
+import co.com.pragma.api.constants.Constants;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -12,19 +13,19 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(name = "Loan Application Response", description = "Loan Application Data.")
+@Schema(name = Constants.SOLICITUDE_RESPONSE_SCHEMA_NAME, description = Constants.SOLICITUDE_RESPONSE_SCHEMA_DESCRIPTION)
 public class SolicitudeResponseDTO {
 
-    @Schema(description = "Loan application's unique identifier.", example = "123")
+    @Schema(description = Constants.SOLICITUDE_ID_DESCRIPTION, example = Constants.EXAMPLE_SOLICITUDE_ID)
     private Integer solicitudeId;
-    @Schema(description = "Loan application's value.", example = "123456.78")
+    @Schema(description = Constants.SOLICITUDE_VALUE_DESCRIPTION, example = Constants.EXAMPLE_SOLICITUDE_VALUE)
     private BigDecimal value;
-    @Schema(description = "Loan application's deadline in months.", example = "12")
+    @Schema(description = Constants.SOLICITUDE_DEADLINE_DESCRIPTION, example = Constants.EXAMPLE_SOLICITUDE_DEADLINE)
     private Integer deadline;
-    @Schema(description = "User's email", example = "john.doe@example.com")
+    @Schema(description = Constants.SOLICITUDE_EMAIL_DESCRIPTION, example = Constants.EXAMPLE_EMAIL)
     private String email;
-    @Schema(description = "State of the Loan application.")
+    @Schema(description = Constants.SOLICITUDE_STATE_DESCRIPTION)
     private StateResponseDTO state;
-    @Schema(description = "Loan Type of the Loan application.")
+    @Schema(description = Constants.SOLICITUDE_LOAN_TYPE_DESCRIPTION)
     private LoanTypeResponseDTO loanType;
 }

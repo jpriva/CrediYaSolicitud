@@ -1,5 +1,6 @@
 package co.com.pragma.api.dto;
 
+import co.com.pragma.api.constants.Constants;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -11,20 +12,20 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(name = "Loan Type Response", description = "Loan Type Data.")
+@Schema(name = Constants.LOAN_TYPE_SCHEMA_NAME, description = Constants.LOAN_TYPE_SCHEMA_DESCRIPTION)
 @Builder(toBuilder = true)
 public class LoanTypeResponseDTO {
-    @Schema(description = "Loan type id", example = "1")
+    @Schema(description = Constants.LOAN_TYPE_ID_DESCRIPTION, example = Constants.EXAMPLE_LOAN_TYPE_ID)
     private Integer loanTypeId;
-    @Schema(description = "Loan type name", example = "CREDI-HOGAR")
+    @Schema(description = Constants.LOAN_TYPE_NAME_DESCRIPTION, example = Constants.EXAMPLE_LOAN_TYPE_NAME)
     private String name;
-    @Schema(description = "Loan type minimum value", example = "50000000.00")
+    @Schema(description = Constants.LOAN_TYPE_MIN_VALUE_DESCRIPTION, example = Constants.EXAMPLE_LOAN_TYPE_MIN_VALUE)
     private BigDecimal minValue;
-    @Schema(description = "Loan type maximum value", example = "800000000.00")
+    @Schema(description = Constants.LOAN_TYPE_MAX_VALUE_DESCRIPTION, example = Constants.EXAMPLE_LOAN_TYPE_MAX_VALUE)
     private BigDecimal maxValue;
-    @Schema(description = "Loan type interest rate", example = "7.20")
+    @Schema(description = Constants.LOAN_TYPE_INTEREST_RATE_DESCRIPTION, example = Constants.EXAMPLE_LOAN_TYPE_INTEREST_RATE)
     private BigDecimal interestRate;
-    @Schema(description = "Loan type autovalidation", example = "0")
+    @Schema(description = Constants.LOAN_TYPE_AUTO_VALIDATION_DESCRIPTION, example = Constants.EXAMPLE_LOAN_TYPE_AUTO_VALIDATION)
     private Boolean autoValidation;
 
 }

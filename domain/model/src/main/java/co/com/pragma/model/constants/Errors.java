@@ -25,5 +25,10 @@ public class Errors {
     public static final String LOAN_TYPE_MIN_MAX_VALUE_ERROR_CODE = "LT002";
     public static final String LOAN_TYPE_MIN_MAX_VALUE_ERROR = "Loan type is not available.";
 
+    public static final String FAIL_READ_REQUEST_CODE = "W001";
+    public static final String FAIL_READ_REQUEST = "Failed to read HTTP message.";
+
+    public static final String UNKNOWN_CODE = "UNKNOWN";
+    public static final String UNKNOWN_ERROR = "We are sorry, something went wrong. Please try again later.";
 
 }
