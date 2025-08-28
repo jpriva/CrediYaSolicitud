@@ -17,7 +17,13 @@ public class Errors {
     public static final String ERROR_SAVING_SOLICITUDE_CODE = "S004";
     public static final String ERROR_SAVING_SOLICITUDE = "Error saving request.";
 
+    public static final String VALUE_OUT_OF_BOUNDS_CODE = "S005";
+
     public static final String LOAN_TYPE_NOT_FOUND_CODE = "LT001";
     public static final String LOAN_TYPE_NOT_FOUND = "Loan type not found.";
+
+    public static final String LOAN_TYPE_MIN_MAX_VALUE_ERROR_CODE = "LT002";
+    public static final String LOAN_TYPE_MIN_MAX_VALUE_ERROR = "Loan type is not available.";
+
 
 }

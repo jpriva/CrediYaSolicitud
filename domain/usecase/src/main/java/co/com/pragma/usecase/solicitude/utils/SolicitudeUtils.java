@@ -1,10 +1,14 @@
 package co.com.pragma.usecase.solicitude.utils;
 
 import co.com.pragma.model.constants.DefaultValues;
+import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.solicitude.Solicitude;
-import co.com.pragma.model.solicitude.exceptions.SolicitudeException;
-import co.com.pragma.model.solicitude.exceptions.SolicitudeFieldBlankException;
-import co.com.pragma.model.solicitude.exceptions.SolicitudeFieldSizeOutOfBounds;
+import co.com.pragma.model.solicitude.exceptions.*;
+
+import java.math.BigDecimal;
+import java.util.StringJoiner;
+
+import static co.com.pragma.model.constants.DefaultValues.DECIMAL_FORMAT;
 
 public class SolicitudeUtils {
 
@@ -47,5 +51,27 @@ public class SolicitudeUtils {
             return new SolicitudeFieldSizeOutOfBounds(DefaultValues.EMAIL_FIELD);
         }
         return null;
+    }
+
+    public static SolicitudeException verifySolicitude(Solicitude solicitude, LoanType loanType) {
+        if (loanType.getMinValue() == null || loanType.getMinValue().compareTo(BigDecimal.ZERO) < 0 || loanType.getMaxValue() == null || loanType.getMaxValue().compareTo(BigDecimal.ZERO) < 0) {
+            return new LoanTypeValueErrorException();
+        }
+        if (solicitude.getValue().compareTo(loanType.getMinValue()) < 0 || solicitude.getValue().compareTo(loanType.getMaxValue()) > 0) {
+            return new SolicitudeValueOutOfBoundsException(loanTypeRangeMessage(loanType.getMinValue(), loanType.getMaxValue()));
+        }
+        return null;
+    }
+
+    private static String loanTypeRangeMessage(BigDecimal minValue, BigDecimal maxValue) {
+        String minValueFormatted = DECIMAL_FORMAT.format(minValue);
+        String maxValueFormatted = DECIMAL_FORMAT.format(maxValue);
+        StringJoiner message = new StringJoiner(" ");
+        message.add(DefaultValues.VALUE_FIELD);
+        message.add(DefaultValues.MOST_BE_BETWEEN);
+        message.add(minValueFormatted);
+        message.add(DefaultValues.AND_CONNECTOR);
+        message.add(maxValueFormatted);
+        return message.toString();
     }
 }
