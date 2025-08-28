@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(name = "Loan Type", description = "Loan Type Data.")
+@Schema(name = "Loan Type Response", description = "Loan Type Data.")
 @Builder(toBuilder = true)
 public class LoanTypeResponseDTO {
     @Schema(description = "Loan type id", example = "1")

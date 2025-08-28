@@ -1,5 +1,6 @@
 package co.com.pragma.r2dbc;
 
+import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.model.solicitude.Solicitude;
 import co.com.pragma.model.solicitude.gateways.SolicitudeRepository;
 import co.com.pragma.r2dbc.mapper.PersistenceSolicitudeMapper;
@@ -13,6 +14,7 @@ public class SolicitudeEntityRepositoryAdapter implements SolicitudeRepository {
 
     private final SolicitudeEntityRepository solicitudeRepository;
     private final PersistenceSolicitudeMapper solicitudeMapper;
+    private final LoggerPort logger;
 
     @Override
     public Mono<Solicitude> save(Solicitude solicitude) {

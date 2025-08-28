@@ -1,7 +1,5 @@
 package co.com.pragma.api.dto;
 
-import co.com.pragma.model.loantype.LoanType;
-import co.com.pragma.model.state.State;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -14,7 +12,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(name = "Loan Application", description = "Loan Application Data.")
+@Schema(name = "Loan Application Response", description = "Loan Application Data.")
 public class SolicitudeResponseDTO {
 
     @Schema(description = "Loan application's unique identifier.", example = "123")

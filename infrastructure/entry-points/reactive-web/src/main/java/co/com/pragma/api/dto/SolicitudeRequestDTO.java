@@ -1,13 +1,10 @@
 package co.com.pragma.api.dto;
 
-import co.com.pragma.model.loantype.LoanType;
-import co.com.pragma.model.state.State;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -18,7 +15,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(name = "Loan Application", description = "Loan Application Data.")
+@Schema(name = "Loan Application Request", description = "Loan Application Data.")
 public class SolicitudeRequestDTO {
     @NotBlank(message = "Value can't be empty")
     @DecimalMin(value = "1.00", message = "Minimum value depends on loan type")

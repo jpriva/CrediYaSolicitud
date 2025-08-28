@@ -9,11 +9,11 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface LoanTypeMapper {
 
-    @Mapping(target = "loanType.name", ignore = true)
-    @Mapping(target = "loanType.minValue", ignore = true)
-    @Mapping(target = "loanType.maxValue", ignore = true)
-    @Mapping(target = "loanType.interestRate", ignore = true)
-    @Mapping(target = "loanType.autoValidation", ignore = true)
+    @Mapping(target = "name", ignore = true)
+    @Mapping(target = "minValue", ignore = true)
+    @Mapping(target = "maxValue", ignore = true)
+    @Mapping(target = "interestRate", ignore = true)
+    @Mapping(target = "autoValidation", ignore = true)
     LoanType toDomain(LoanTypeRequestDTO dto);
 
     LoanTypeResponseDTO toResponseDto(LoanType loanType);

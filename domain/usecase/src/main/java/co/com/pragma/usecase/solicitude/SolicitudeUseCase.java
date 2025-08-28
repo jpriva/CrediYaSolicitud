@@ -65,8 +65,9 @@ public class SolicitudeUseCase {
                         return Mono.error(exception);
                     }
                     Solicitude validatedSolicitude = solicitude.toBuilder().loanType(loanType).state(state).build();
-                    return solicitudeRepository.save(validatedSolicitude).map(savedSolicitude ->
-                            solicitude.toBuilder().loanType(loanType).state(state).build()
+                    return solicitudeRepository.save(validatedSolicitude)
+                            .map(savedSolicitude ->
+                                    savedSolicitude.toBuilder().loanType(loanType).state(state).build()
                     );
                 });
 
