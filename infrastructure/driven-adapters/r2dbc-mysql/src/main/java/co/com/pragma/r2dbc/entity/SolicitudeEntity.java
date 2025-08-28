@@ -24,7 +24,7 @@ public class SolicitudeEntity {
     private BigDecimal value;
 
     @Column("plazo")
-    private String term;
+    private Integer term;
 
     @Column("email")
     private String email;

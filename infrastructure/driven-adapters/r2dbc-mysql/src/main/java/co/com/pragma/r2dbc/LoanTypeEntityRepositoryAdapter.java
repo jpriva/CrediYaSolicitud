@@ -2,23 +2,27 @@ package co.com.pragma.r2dbc;
 
 import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.gateways.LoanTypeRepository;
-import co.com.pragma.r2dbc.entity.LoanTypeEntity;
-import co.com.pragma.r2dbc.helper.ReactiveAdapterOperations;
-import org.reactivecommons.utils.ObjectMapper;
+import co.com.pragma.r2dbc.mapper.PersistenceLoanTypeMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Example;
+import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-public class LoanTypeEntityRepositoryAdapter extends ReactiveAdapterOperations<
-        LoanType,
-        LoanTypeEntity,
-        Integer,
-        LoanTypeEntityRepository
-        > implements LoanTypeRepository {
-    public LoanTypeEntityRepositoryAdapter(LoanTypeEntityRepository repository, ObjectMapper mapper) {
-        /**
-         *  Could be use mapper.mapBuilder if your domain model implement builder pattern
-         *  super(repository, mapper, d -> mapper.mapBuilder(d,ObjectModel.ObjectModelBuilder.class).build());
-         *  Or using mapper.map with the class of the object model
-         */
-        super(repository, mapper, d -> mapper.map(d, LoanType.class));
+@Repository
+@RequiredArgsConstructor
+public class LoanTypeEntityRepositoryAdapter implements LoanTypeRepository {
+    private final LoanTypeEntityRepository loanTypeRepository;
+    private final PersistenceLoanTypeMapper loanTypeMapper;
+
+    @Override
+    public Flux<LoanType> findAll() {
+        return null;
     }
 
+    @Override
+    public Mono<LoanType> findOne(LoanType example) {
+        return loanTypeRepository.findOne(Example.of(loanTypeMapper.toEntity(example)))
+                .map(loanTypeMapper::toDomain);
+    }
 }
