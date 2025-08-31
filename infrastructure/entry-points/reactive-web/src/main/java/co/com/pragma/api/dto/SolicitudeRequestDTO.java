@@ -3,7 +3,6 @@ package co.com.pragma.api.dto;
 import co.com.pragma.api.constants.Constants;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -29,13 +28,11 @@ public class SolicitudeRequestDTO {
     @Schema(description = Constants.SOLICITUDE_REQUEST_DEADLINE_DESCRIPTION, example = Constants.EXAMPLE_SOLICITUDE_DEADLINE)
     private Integer deadline;
 
-    @NotBlank(message = Constants.VALIDATION_EMAIL_NOT_BLANK)
-    @Email(message = Constants.VALIDATION_EMAIL_FORMAT)
-    @Schema(description = Constants.SOLICITUDE_REQUEST_EMAIL_DESCRIPTION, example = Constants.EXAMPLE_EMAIL)
-    private String email;
+    @NotBlank(message = Constants.VALIDATION_ID_NUMBER_NOT_BLANK)
+    @Schema(description = Constants.SOLICITUDE_REQUEST_ID_NUMBER_DESCRIPTION, example = Constants.EXAMPLE_ID_NUMBER)
+    private String idNumber;
 
-    @NotNull(message = Constants.VALIDATION_LOAN_TYPE_NOT_NULL)
-    @Valid
-    @Schema(description = Constants.SOLICITUDE_REQUEST_LOAN_TYPE_DESCRIPTION)
-    private LoanTypeRequestDTO loanType;
+    @NotNull(message = Constants.VALIDATION_LOAN_TYPE_ID_NOT_NULL)
+    @Schema(description = Constants.LOAN_TYPE_REQUEST_ID_DESCRIPTION, example = Constants.EXAMPLE_LOAN_TYPE_ID)
+    private Integer loanTypeId;
 }

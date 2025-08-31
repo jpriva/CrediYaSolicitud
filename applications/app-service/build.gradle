@@ -1,6 +1,7 @@
 apply plugin: 'org.springframework.boot'
 
 dependencies {
+	implementation project(':webclient')
 	implementation project(':reactive-web')
 	implementation project(':logger')
 	implementation project(':r2dbc-mysql')

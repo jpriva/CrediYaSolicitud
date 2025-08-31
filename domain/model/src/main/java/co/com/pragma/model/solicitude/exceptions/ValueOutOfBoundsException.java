@@ -2,9 +2,9 @@ package co.com.pragma.model.solicitude.exceptions;
 
 import co.com.pragma.model.constants.Errors;
 
-public class SolicitudeValueOutOfBoundsException extends SolicitudeException {
+public class ValueOutOfBoundsException extends CustomException {
 
-    public SolicitudeValueOutOfBoundsException(String message) {
+    public ValueOutOfBoundsException(String message) {
         super(message, Errors.VALUE_OUT_OF_BOUNDS_CODE);
     }
 }

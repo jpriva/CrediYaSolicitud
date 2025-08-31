@@ -15,7 +15,9 @@ public interface SolicitudeMapper {
     @Mapping(target = "loanType.interestRate", ignore = true)
     @Mapping(target = "loanType.autoValidation", ignore = true)
     @Mapping(target = "solicitudeId", ignore = true)
+    @Mapping(target = "email", ignore = true)
     @Mapping(target = "state", ignore = true)
+    @Mapping(source = "loanTypeId", target = "loanType.loanTypeId")
     Solicitude toDomain(SolicitudeRequestDTO dto);
 
     SolicitudeResponseDTO toResponseDto(Solicitude solicitude);

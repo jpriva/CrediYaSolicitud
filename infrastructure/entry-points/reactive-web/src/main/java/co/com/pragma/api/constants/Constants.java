@@ -25,6 +25,7 @@ public final class Constants {
     public static final String EXAMPLE_SOLICITUDE_VALUE = "123456.78";
     public static final String EXAMPLE_SOLICITUDE_DEADLINE = "12";
     public static final String EXAMPLE_EMAIL = "john.doe@example.com";
+    public static final String EXAMPLE_ID_NUMBER = "123456789";
 
     // --- State Schema Descriptions & Examples ---
     public static final String STATE_ID_DESCRIPTION = "State identifier.";
@@ -60,6 +61,7 @@ public final class Constants {
     public static final String SOLICITUDE_REQUEST_VALUE_DESCRIPTION = "Loan application's value.";
     public static final String SOLICITUDE_REQUEST_DEADLINE_DESCRIPTION = "Loan application's deadline in months.";
     public static final String SOLICITUDE_REQUEST_EMAIL_DESCRIPTION = "User's email";
+    public static final String SOLICITUDE_REQUEST_ID_NUMBER_DESCRIPTION = "User's id number";
     public static final String SOLICITUDE_REQUEST_LOAN_TYPE_DESCRIPTION = "Loan Type.";
 
     // --- Solicitude Request Validations ---
@@ -70,6 +72,7 @@ public final class Constants {
     public static final String VALIDATION_DEADLINE_MIN = "Minimum value must be at least 1";
     public static final String VALIDATION_DEADLINE_MAX = "Maximum value must be at least 360, equivalent to 30 years";
     public static final String VALIDATION_EMAIL_NOT_BLANK = "Email can't be blank";
+    public static final String VALIDATION_ID_NUMBER_NOT_BLANK = "Id number can't be blank";
     public static final String VALIDATION_EMAIL_FORMAT = "Email must be in a valid format";
     public static final String VALIDATION_LOAN_TYPE_NOT_NULL = "Loan Type can't be null";
 

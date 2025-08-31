@@ -13,6 +13,7 @@ spring:
     password: "pass12345"
     locations: "classpath:db/migration"
     enabled: true
+
 adapters:
   r2dbc:
     host: "localhost"
@@ -20,6 +21,11 @@ adapters:
     database: "solicitudes_db"
     username: "jpriva"
     password: "pass12345"
+  restconsumer:
+    url: "http://localhost:8081"
+    timeout: 5000
+
+
 management:
   endpoints:
     web:
@@ -43,3 +49,5 @@ springdoc:
       description: "This is the API for Crediya Auth Microservice"
   swagger-ui:
     path: /swagger-ui.html
+
+

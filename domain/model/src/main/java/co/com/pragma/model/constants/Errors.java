@@ -15,7 +15,7 @@ public class Errors {
     public static final String SIZE_OUT_OF_BOUNDS = "Size out of bounds.";
 
     public static final String ERROR_SAVING_SOLICITUDE_CODE = "S004";
-    public static final String ERROR_SAVING_SOLICITUDE = "Error saving request.";
+    public static final String ERROR_SAVING_SOLICITUDE = "Error saving application.";
 
     public static final String VALUE_OUT_OF_BOUNDS_CODE = "S005";
 
@@ -30,5 +30,13 @@ public class Errors {
 
     public static final String UNKNOWN_CODE = "UNKNOWN";
     public static final String UNKNOWN_ERROR = "We are sorry, something went wrong. Please try again later.";
+
+    public static final String USER_NOT_FOUND_CODE = "U101";
+    public static final String USER_NOT_FOUND = "User not found with idNumber: ";
+
+    public static final String COMMUNICATION_FAILED_CODE = "C001";
+    public static final String COMMUNICATION_FAILED = "Communication failed with user service";
+
+    public static final String ERROR_FROM_USER_SERVICE = "Error from user service: ";
 
 }
