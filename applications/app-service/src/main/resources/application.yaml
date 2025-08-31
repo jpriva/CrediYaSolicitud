@@ -13,6 +13,9 @@ spring:
     password: "pass12345"
     locations: "classpath:db/migration"
     enabled: true
+  output:
+    ansi:
+      enabled: ALWAYS
 
 adapters:
   r2dbc:

@@ -4,6 +4,7 @@ import co.com.pragma.api.constants.Constants;
 import co.com.pragma.api.dto.ErrorDTO;
 import co.com.pragma.api.dto.SolicitudeRequestDTO;
 import co.com.pragma.api.dto.SolicitudeResponseDTO;
+import co.com.pragma.api.exception.handler.GlobalExceptionHandler;
 import co.com.pragma.api.mapper.SolicitudeMapper;
 import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.model.solicitude.Solicitude;
@@ -24,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@ContextConfiguration(classes = {RouterRest.class, Handler.class})
+@ContextConfiguration(classes = {RouterRest.class, Handler.class, GlobalExceptionHandler.class})
 @WebFluxTest
 class RouterRestTest {
 
