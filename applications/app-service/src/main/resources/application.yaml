@@ -1,14 +1,56 @@
-##Spring Configuration
 server:
-  port: 8080
+  port: 8082
 spring:
   application:
-    name: CrediYaSolicitud
+    name: "CrediYaSolicitud"
   devtools:
     add-properties: false
-  h2:
-    console:
-      enabled: true
-      path: /h2
   profiles:
-    include:
+    include: null
+  flyway:
+    url: "jdbc:mysql://localhost:3307/solicitudes_db"
+    user: "jpriva"
+    password: "pass12345"
+    locations: "classpath:db/migration"
+    enabled: true
+  output:
+    ansi:
+      enabled: ALWAYS
+
+adapters:
+  r2dbc:
+    host: "localhost"
+    port: 3307
+    database: "solicitudes_db"
+    username: "jpriva"
+    password: "pass12345"
+  restconsumer:
+    url: "http://localhost:8081"
+    timeout: 5000
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  server:
+    port: 9091
+
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:8082"
+
+springdoc:
+  api-docs:
+    info:
+      title: "Crediya Auth API Microservice"
+      version: "1.0.0"
+      description: "This is the API for Crediya Auth Microservice"
+  swagger-ui:
+    path: /swagger-ui.html
+
+
