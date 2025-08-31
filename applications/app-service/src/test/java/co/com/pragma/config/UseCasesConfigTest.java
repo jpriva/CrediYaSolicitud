@@ -5,6 +5,7 @@ import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.model.solicitude.gateways.SolicitudeRepository;
 import co.com.pragma.model.state.gateways.StateRepository;
 import co.com.pragma.model.transaction.gateways.TransactionalPort;
+import co.com.pragma.model.user.gateways.UserPort;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -49,6 +50,11 @@ class UseCasesConfigTest {
         @Bean
         public StateRepository stateRepository() {
             return Mockito.mock(StateRepository.class);
+        }
+
+        @Bean
+        public UserPort userPort() {
+            return Mockito.mock(UserPort.class);
         }
 
         @Bean

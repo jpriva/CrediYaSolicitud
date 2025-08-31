@@ -63,9 +63,9 @@ public class SolicitudeUtils {
                         loanType.getMaxValue() != null &&
                         loanType.getMaxValue().compareTo(BigDecimal.ZERO) >= 0,
                 LoanTypeValueErrorException::new)
-                .then(validateCondition(solicitude.getValue().compareTo(loanType.getMinValue()) >= 0 &&
+                .then(Mono.defer(() -> validateCondition(solicitude.getValue().compareTo(loanType.getMinValue()) >= 0 &&
                                 solicitude.getValue().compareTo(loanType.getMaxValue()) <= 0,
-                        () -> new ValueOutOfBoundsException(loanTypeRangeMessage(loanType.getMinValue(), loanType.getMaxValue()))))
+                        () -> new ValueOutOfBoundsException(loanTypeRangeMessage(loanType.getMinValue(), loanType.getMaxValue())))))
                 .thenReturn(solicitude);
     }
 

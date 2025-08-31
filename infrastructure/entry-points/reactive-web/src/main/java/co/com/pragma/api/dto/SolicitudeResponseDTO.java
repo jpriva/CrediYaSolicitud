@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 @Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(name = Constants.SOLICITUDE_RESPONSE_SCHEMA_NAME, description = Constants.SOLICITUDE_RESPONSE_SCHEMA_DESCRIPTION)

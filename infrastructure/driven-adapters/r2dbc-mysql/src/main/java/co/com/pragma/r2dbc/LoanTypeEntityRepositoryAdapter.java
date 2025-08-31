@@ -16,7 +16,8 @@ public class LoanTypeEntityRepositoryAdapter implements LoanTypeRepository {
 
     @Override
     public Flux<LoanType> findAll() {
-        return null;
+        return loanTypeRepository.findAll()
+                .map(loanTypeMapper::toDomain);
     }
 
     @Override

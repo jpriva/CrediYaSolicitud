@@ -42,7 +42,7 @@ public class SolicitudeUseCase {
                 .flatMap(SolicitudeUtils::validateFields)
                 .map(solicitudeMono -> solicitudeMono.toBuilder().state(State.builder().name(DefaultValues.PENDING_STATE).build()).build())
                 .flatMap(this::saveSolicitudeTransaction)
-                .doFirst(() -> logger.info(LogMessages.START_SAVING_SOLICITUDE_PROCESS + " for email: {}", solicitude.getEmail()))
+                .doFirst(() -> logger.info(LogMessages.START_SAVING_SOLICITUDE_PROCESS + " for user with idNumber: {}", idNumber))
                 .doOnError(ex -> logger.error(Errors.ERROR_SAVING_SOLICITUDE + " for user with idNumber: {}", idNumber, ex))
                 .doOnSuccess(savedSolicitude -> logger.info(LogMessages.SAVED_SOLICITUDE + " with ID: {}", savedSolicitude.getSolicitudeId()))
                 .as(transactionalPort::transactional);
@@ -70,7 +70,7 @@ public class SolicitudeUseCase {
                                     .state(tuple.getT2())
                                     .build())
                             .flatMap(solicitudeRepository::save)
-                            .map(validatedSolicitude -> validatedSolicitude.toBuilder()
+                            .map(savedSolicitude -> savedSolicitude.toBuilder()
                                     .loanType(tuple.getT1())
                                     .state(tuple.getT2())
                                     .build())

@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.reactive.TransactionalOperator;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Configuration
@@ -13,16 +14,18 @@ import reactor.core.publisher.Mono;
 public class TransactionConfig {
 
     @Bean
-    public TransactionalOperator transactionalOperator(ReactiveTransactionManager transactionManager) {
-        return TransactionalOperator.create(transactionManager);
-    }
-
-    @Bean
-    public TransactionalPort transactionalPort(TransactionalOperator transactionalOperator){
+    public TransactionalPort transactionalPort(ReactiveTransactionManager transactionManager){
         return new TransactionalPort() {
             @Override
             public <T> Mono<T> transactional(Mono<T> mono) {
+                TransactionalOperator transactionalOperator = TransactionalOperator.create(transactionManager);
                 return mono.as(transactionalOperator::transactional);
+            }
+
+            @Override
+            public <T> Flux<T> transactional(Flux<T> flux) {
+                TransactionalOperator transactionalOperator = TransactionalOperator.create(transactionManager);
+                return transactionalOperator.transactional(flux);
             }
         };
     }

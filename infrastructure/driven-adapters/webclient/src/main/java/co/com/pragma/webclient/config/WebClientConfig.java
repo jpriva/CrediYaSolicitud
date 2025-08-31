@@ -2,7 +2,8 @@ package co.com.pragma.webclient.config;
 
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -10,26 +11,26 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
+import java.util.concurrent.TimeUnit;
+
 @Configuration
+@RequiredArgsConstructor
+@EnableConfigurationProperties(WebClientProperties.class)
 public class WebClientConfig {
 
-    @Value("${adapters.restconsumer.url:https://api.example.com}")
-    private String url;
-
-    @Value("${adapters.restconsumer.timeout:5000}")
-    private int timeout;
+    private final WebClientProperties properties;
 
     @Bean
     public WebClient webClient() {
         HttpClient httpClient = HttpClient.create()
                 .doOnConnected(connection ->
-                        connection.addHandlerLast(new ReadTimeoutHandler(timeout))
-                                .addHandlerLast(new WriteTimeoutHandler(timeout))
+                        connection.addHandlerLast(new ReadTimeoutHandler(properties.getTimeout(), TimeUnit.MILLISECONDS))
+                                .addHandlerLast(new WriteTimeoutHandler(properties.getTimeout(), TimeUnit.MILLISECONDS))
                 );
 
         return WebClient.builder()
-                .baseUrl(url)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE,"application/json")
+                .baseUrl(properties.getUrl())
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
     }
