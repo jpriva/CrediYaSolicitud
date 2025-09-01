@@ -1,11 +1,14 @@
 package co.com.pragma.usecase.solicitude.utils;
 
 import co.com.pragma.model.constants.DefaultValues;
+import co.com.pragma.model.exceptions.InvalidCredentialsException;
+import co.com.pragma.model.jwt.JwtData;
 import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.exceptions.LoanTypeValueErrorException;
 import co.com.pragma.model.solicitude.Solicitude;
 import co.com.pragma.model.solicitude.exceptions.FieldBlankException;
 import co.com.pragma.model.solicitude.exceptions.FieldSizeOutOfBounds;
+import co.com.pragma.model.solicitude.exceptions.InvalidFieldException;
 import co.com.pragma.model.solicitude.exceptions.ValueOutOfBoundsException;
 import reactor.core.publisher.Mono;
 
@@ -77,5 +80,14 @@ public class SolicitudeUtils {
                 .add(DefaultValues.AND_CONNECTOR)
                 .add(DECIMAL_FORMAT.format(maxValue));
         return message.toString();
+    }
+
+    public static Mono<Solicitude> validateFromToken(Solicitude solicitude, String idNumber, JwtData token) {
+        if (token != null) {
+            return validateCondition(token.idNumber() != null && token.idNumber().equals(idNumber), () -> new InvalidFieldException(DefaultValues.ID_NUMBER_FIELD))
+                    .then(Mono.defer(() -> validateCondition(token.subject() != null && !token.subject().isBlank(), () -> new InvalidFieldException(DefaultValues.EMAIL_FIELD))))
+                    .thenReturn(solicitude.toBuilder().email(token.subject()).build());
+        }
+        return Mono.error(new InvalidCredentialsException());
     }
 }
