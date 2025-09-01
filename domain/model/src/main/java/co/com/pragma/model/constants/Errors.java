@@ -47,5 +47,10 @@ public class Errors {
     public static final String INVALID_CREDENTIALS_CODE = "IC001";
     public static final String INVALID_CREDENTIALS = "Invalid credentials.";
 
+    public static final String INVALID_ENDPOINT_CODE = "IE001";
+    public static final String INVALID_ENDPOINT = "Invalid endpoint.";
+
+    public static final String ACCESS_DENIED_CODE = "AD001";
+    public static final String ACCESS_DENIED = "Access denied. You do not have the necessary permissions to access this resource.";
 
 }

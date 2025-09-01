@@ -41,6 +41,7 @@ public class WebSecurityConfig {
                         .pathMatchers(
                                 ApiPathMatchers.API_DOCS_MATCHER,
                                 ApiPathMatchers.SWAGGER_UI_MATCHER,
+                                ApiConstants.ApiPaths.SWAGGER_PATH,
                                 ApiPathMatchers.WEB_JARS_MATCHER,
                                 ApiPathMatchers.TEST_MATCHER
                         ).permitAll()

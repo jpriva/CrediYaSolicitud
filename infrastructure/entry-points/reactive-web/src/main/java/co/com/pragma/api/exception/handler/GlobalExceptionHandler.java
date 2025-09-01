@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.*;
+import org.springframework.web.reactive.resource.NoResourceFoundException;
 import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
 
@@ -61,6 +62,11 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
             return new ErrorResponse(
                     HttpStatus.BAD_REQUEST,
                     ErrorDTO.builder().timestamp(Instant.now()).path(path).code(Errors.FAIL_READ_REQUEST_CODE).message(Errors.FAIL_READ_REQUEST).build()
+            );
+        } else if (error instanceof NoResourceFoundException) {
+            return new ErrorResponse(
+                    HttpStatus.NOT_FOUND,
+                    ErrorDTO.builder().timestamp(Instant.now()).path(path).code(Errors.INVALID_ENDPOINT_CODE).message(Errors.INVALID_ENDPOINT).build()
             );
         } else if (error instanceof CustomException ex) {
             HttpStatus status = HttpStatus.resolve(ex.getWebStatus());

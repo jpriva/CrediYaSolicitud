@@ -2,6 +2,7 @@ package co.com.pragma.api;
 
 import co.com.pragma.api.dto.SolicitudeRequestDTO;
 import co.com.pragma.api.mapper.SolicitudeMapper;
+import co.com.pragma.model.exceptions.InvalidCredentialsException;
 import co.com.pragma.model.jwt.JwtData;
 import co.com.pragma.model.jwt.gateways.JwtProviderPort;
 import co.com.pragma.model.logs.gateways.LoggerPort;
@@ -25,9 +26,13 @@ public class Handler {
 
     public Mono<ServerResponse> listenPOSTSaveSolicitudeUseCase(ServerRequest serverRequest) {
         Mono<JwtData> tokenMono = Mono.justOrEmpty(serverRequest.headers().firstHeader("Authorization"))
+                .filter(header -> header.startsWith("Bearer "))
                 .map(bearer -> bearer.substring(7))
-                .map(jwtProvider::getClaims);
+                .map(jwtProvider::getClaims)
+                .switchIfEmpty(Mono.error(new InvalidCredentialsException()));
+
         Mono<SolicitudeRequestDTO> solicitudeMono = serverRequest.bodyToMono(SolicitudeRequestDTO.class);
+
         return Mono.zip(solicitudeMono, tokenMono)
                 .flatMap(tuple ->
                         solicitudeUseCase.saveSolicitude(
