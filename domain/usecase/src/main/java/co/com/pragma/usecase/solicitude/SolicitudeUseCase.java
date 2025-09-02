@@ -15,7 +15,6 @@ import co.com.pragma.model.state.State;
 import co.com.pragma.model.state.exceptions.StateNotFoundException;
 import co.com.pragma.model.state.gateways.StateRepository;
 import co.com.pragma.model.transaction.gateways.TransactionalPort;
-import co.com.pragma.model.user.gateways.UserPort;
 import co.com.pragma.usecase.solicitude.utils.SolicitudeUtils;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -23,16 +22,11 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class SolicitudeUseCase {
 
-    // START Injected Properties ****************************************************************
-
     private final LoanTypeRepository loanTypeRepository;
     private final StateRepository stateRepository;
     private final SolicitudeRepository solicitudeRepository;
-    private final UserPort userPort;
     private final LoggerPort logger;
     private final TransactionalPort transactionalPort;
-
-    // END Injected Properties ******************************************************************
 
     public Mono<Solicitude> saveSolicitude(Solicitude solicitude,String idNumber, JwtData token) {
         return Mono.justOrEmpty(solicitude)

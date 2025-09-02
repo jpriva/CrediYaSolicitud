@@ -6,10 +6,10 @@ import co.com.pragma.model.jwt.JwtData;
 import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.exceptions.LoanTypeValueErrorException;
 import co.com.pragma.model.solicitude.Solicitude;
-import co.com.pragma.model.solicitude.exceptions.FieldBlankException;
-import co.com.pragma.model.solicitude.exceptions.FieldSizeOutOfBounds;
-import co.com.pragma.model.solicitude.exceptions.InvalidFieldException;
-import co.com.pragma.model.solicitude.exceptions.ValueOutOfBoundsException;
+import co.com.pragma.model.exceptions.FieldBlankException;
+import co.com.pragma.model.exceptions.FieldSizeOutOfBounds;
+import co.com.pragma.model.exceptions.InvalidFieldException;
+import co.com.pragma.model.exceptions.ValueOutOfBoundsException;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;

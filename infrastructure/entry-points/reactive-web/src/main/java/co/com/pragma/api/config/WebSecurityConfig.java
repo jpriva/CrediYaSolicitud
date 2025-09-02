@@ -2,6 +2,7 @@ package co.com.pragma.api.config;
 
 import co.com.pragma.api.constants.ApiConstants;
 import co.com.pragma.api.constants.ApiConstants.ApiPathMatchers;
+import co.com.pragma.api.exception.handler.CustomAccessDeniedHandler;
 import co.com.pragma.model.exceptions.InvalidCredentialsException;
 import co.com.pragma.model.jwt.JwtData;
 import co.com.pragma.model.jwt.gateways.JwtProviderPort;
@@ -29,6 +30,7 @@ import java.util.List;
 public class WebSecurityConfig {
 
     private final JwtProviderPort jwtProvider;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
@@ -50,6 +52,9 @@ public class WebSecurityConfig {
                         ).hasAnyAuthority(
                                 ApiConstants.Role.CLIENT_ROLE_NAME
                         ).anyExchange().authenticated()
+                )
+                .exceptionHandling(spec ->
+                        spec.accessDeniedHandler(accessDeniedHandler)
                 )
                 .build();
     }

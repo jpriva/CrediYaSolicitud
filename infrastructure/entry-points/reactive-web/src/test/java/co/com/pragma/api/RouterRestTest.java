@@ -12,7 +12,7 @@ import co.com.pragma.model.jwt.JwtData;
 import co.com.pragma.model.jwt.gateways.JwtProviderPort;
 import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.model.solicitude.Solicitude;
-import co.com.pragma.model.solicitude.exceptions.CustomException;
+import co.com.pragma.model.exceptions.CustomException;
 import co.com.pragma.usecase.solicitude.SolicitudeUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

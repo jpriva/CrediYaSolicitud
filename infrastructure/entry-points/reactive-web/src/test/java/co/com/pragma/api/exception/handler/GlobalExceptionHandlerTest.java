@@ -3,7 +3,7 @@ package co.com.pragma.api.exception.handler;
 import co.com.pragma.api.dto.ErrorDTO;
 import co.com.pragma.model.constants.Errors;
 import co.com.pragma.model.logs.gateways.LoggerPort;
-import co.com.pragma.model.solicitude.exceptions.CustomException;
+import co.com.pragma.model.exceptions.CustomException;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;

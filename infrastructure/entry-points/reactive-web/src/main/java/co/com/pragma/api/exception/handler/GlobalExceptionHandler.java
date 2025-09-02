@@ -4,7 +4,7 @@ import co.com.pragma.api.dto.ErrorDTO;
 import co.com.pragma.model.constants.Errors;
 import co.com.pragma.model.constants.LogMessages;
 import co.com.pragma.model.logs.gateways.LoggerPort;
-import co.com.pragma.model.solicitude.exceptions.CustomException;
+import co.com.pragma.model.exceptions.CustomException;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;

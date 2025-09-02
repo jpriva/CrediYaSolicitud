@@ -1,7 +1,7 @@
 package co.com.pragma.model.state.exceptions;
 
 import co.com.pragma.model.constants.Errors;
-import co.com.pragma.model.solicitude.exceptions.CustomException;
+import co.com.pragma.model.exceptions.CustomException;
 
 public class StateNotFoundException extends CustomException {
     public StateNotFoundException()  {

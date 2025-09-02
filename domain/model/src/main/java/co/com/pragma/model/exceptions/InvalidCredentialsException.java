@@ -1,7 +1,6 @@
 package co.com.pragma.model.exceptions;
 
 import co.com.pragma.model.constants.Errors;
-import co.com.pragma.model.solicitude.exceptions.CustomException;
 
 import java.net.HttpURLConnection;
 

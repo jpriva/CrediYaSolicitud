@@ -2,8 +2,6 @@ package co.com.pragma.jwtadapter;
 
 import co.com.pragma.jwtadapter.config.JwtProperties;
 import co.com.pragma.model.jwt.JwtData;
-import co.com.pragma.model.user.Role;
-import co.com.pragma.model.user.User;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -26,7 +24,6 @@ import static org.awaitility.Awaitility.await;
 class JwtProviderAdapterTest {
 
     private JwtProviderAdapter jwtProviderAdapter;
-    private User testUser;
     private JwtProperties properties;
 
     @BeforeEach
@@ -37,32 +34,25 @@ class JwtProviderAdapterTest {
 
         jwtProviderAdapter = new JwtProviderAdapter(properties);
 
-        testUser = User.builder()
-                .name("John")
-                .lastName("Doe")
-                .email("john.doe@example.com")
-                .idNumber("123456789")
-                .role(Role.builder().rolId(1).name("ADMIN").build())
-                .build();
     }
 
     @Test
     void getClaims_shouldParseValidToken() {
-        String token = generateTestToken(testUser, properties.getExpiration());
+        String token = generateTestToken("john.doe@example.com", "John Doe", "12345", "CLIENTE", 1, properties.getExpiration());
 
         JwtData claims = jwtProviderAdapter.getClaims(token);
 
         assertThat(claims).isNotNull();
-        assertThat(claims.subject()).isEqualTo(testUser.getEmail());
-        assertThat(claims.role()).isEqualTo(testUser.getRole().getName());
-        assertThat(claims.roleId()).isEqualTo((Integer) testUser.getRole().getRolId());
+        assertThat(claims.subject()).isEqualTo("john.doe@example.com");
+        assertThat(claims.role()).isEqualTo("CLIENTE");
+        assertThat(claims.roleId()).isEqualTo(1);
         assertThat(claims.name()).isEqualTo("John Doe");
-        assertThat(claims.idNumber()).isEqualTo(testUser.getIdNumber());
+        assertThat(claims.idNumber()).isEqualTo("12345");
     }
 
     @Test
     void getClaims_shouldThrowExceptionForInvalidSignature() {
-        String validToken = generateTestToken(testUser, properties.getExpiration());
+        String validToken = generateTestToken("user@test.com", "Test User", "111", "ADMIN", 2, properties.getExpiration());
         String invalidToken = validToken.substring(0, validToken.lastIndexOf('.')) + ".invalidSignature";
 
         assertThatThrownBy(() -> jwtProviderAdapter.getClaims(invalidToken))
@@ -71,28 +61,29 @@ class JwtProviderAdapterTest {
 
     @Test
     void getClaims_shouldThrowExceptionForExpiredToken() {
-        String expiredToken = generateTestToken(testUser, 0L);
+        String expiredToken = generateTestToken("user@test.com", "Test User", "111", "ADMIN", 2, 0L);
 
         await().atMost(Duration.ofSeconds(1)).untilAsserted(() ->
                 assertThatThrownBy(() -> jwtProviderAdapter.getClaims(expiredToken))
                         .isInstanceOf(ExpiredJwtException.class)
         );
     }
-    private String generateTestToken(User user, long expirationSeconds) {
+
+    private String generateTestToken(String subject, String name, String idNumber, String role, Integer roleId, long expirationSeconds) {
         Map<String, Object> claims = new HashMap<>();
-        if (user.getRole() != null) {
-            claims.put("role", user.getRole().getName());
-            claims.put("roleId", user.getRole().getRolId());
+        if (role != null) {
+            claims.put("role", role);
+            claims.put("roleId", roleId);
         }
-        claims.put("name", user.getName() + " " + user.getLastName());
-        claims.put("idNumber", user.getIdNumber());
+        claims.put("name", name);
+        claims.put("idNumber", idNumber);
 
         byte[] keyBytes = Base64.getDecoder().decode(properties.getSecret());
         SecretKey key = Keys.hmacShaKeyFor(keyBytes);
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(user.getEmail())
+                .setSubject(subject)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationSeconds * 1000))
                 .signWith(key, SignatureAlgorithm.HS256)
