@@ -1,6 +1,4 @@
-package co.com.pragma.model.user.exceptions;
-
-import co.com.pragma.model.solicitude.exceptions.CustomException;
+package co.com.pragma.model.exceptions;
 
 public class UserGatewayException extends CustomException {
     public UserGatewayException(String message, String code) {

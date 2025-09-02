@@ -4,7 +4,7 @@ import co.com.pragma.api.dto.ErrorDTO;
 import co.com.pragma.model.constants.Errors;
 import co.com.pragma.model.constants.LogMessages;
 import co.com.pragma.model.logs.gateways.LoggerPort;
-import co.com.pragma.model.solicitude.exceptions.CustomException;
+import co.com.pragma.model.exceptions.CustomException;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.*;
+import org.springframework.web.reactive.resource.NoResourceFoundException;
 import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
 
@@ -61,6 +62,11 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
             return new ErrorResponse(
                     HttpStatus.BAD_REQUEST,
                     ErrorDTO.builder().timestamp(Instant.now()).path(path).code(Errors.FAIL_READ_REQUEST_CODE).message(Errors.FAIL_READ_REQUEST).build()
+            );
+        } else if (error instanceof NoResourceFoundException) {
+            return new ErrorResponse(
+                    HttpStatus.NOT_FOUND,
+                    ErrorDTO.builder().timestamp(Instant.now()).path(path).code(Errors.INVALID_ENDPOINT_CODE).message(Errors.INVALID_ENDPOINT).build()
             );
         } else if (error instanceof CustomException ex) {
             HttpStatus status = HttpStatus.resolve(ex.getWebStatus());

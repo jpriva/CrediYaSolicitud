@@ -1,4 +1,4 @@
-package co.com.pragma.model.solicitude.exceptions;
+package co.com.pragma.model.exceptions;
 
 import lombok.Getter;
 

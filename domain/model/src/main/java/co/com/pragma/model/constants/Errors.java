@@ -1,10 +1,11 @@
 package co.com.pragma.model.constants;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Errors {
 
-
-
-    private Errors(){}
     public static final String SOLICITUDE_NULL_CODE = "S001";
     public static final String SOLICITUDE_NULL = "Application is null.";
 
@@ -18,6 +19,10 @@ public class Errors {
     public static final String ERROR_SAVING_SOLICITUDE = "Error saving application.";
 
     public static final String VALUE_OUT_OF_BOUNDS_CODE = "S005";
+    public static final String VALUE_OUT_OF_BOUNDS = "Value out of bounds.";
+
+    public static final String INVALID_FIELD_CODE = "S003";
+    public static final String INVALID_FIELD = "Invalid Value.";
 
     public static final String LOAN_TYPE_NOT_FOUND_CODE = "LT001";
     public static final String LOAN_TYPE_NOT_FOUND = "Loan type not found.";
@@ -38,5 +43,14 @@ public class Errors {
     public static final String COMMUNICATION_FAILED = "Communication failed with user service";
 
     public static final String ERROR_FROM_USER_SERVICE = "Error from user service: ";
+
+    public static final String INVALID_CREDENTIALS_CODE = "IC001";
+    public static final String INVALID_CREDENTIALS = "Invalid credentials.";
+
+    public static final String INVALID_ENDPOINT_CODE = "IE001";
+    public static final String INVALID_ENDPOINT = "Invalid endpoint.";
+
+    public static final String ACCESS_DENIED_CODE = "AD001";
+    public static final String ACCESS_DENIED = "Access denied. You do not have the necessary permissions to access this resource.";
 
 }

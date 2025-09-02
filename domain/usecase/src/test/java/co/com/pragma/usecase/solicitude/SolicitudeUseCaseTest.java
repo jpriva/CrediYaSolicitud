@@ -1,21 +1,20 @@
 package co.com.pragma.usecase.solicitude;
 
 import co.com.pragma.model.constants.DefaultValues;
+import co.com.pragma.model.jwt.JwtData;
 import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.exceptions.LoanTypeNotFoundException;
 import co.com.pragma.model.loantype.gateways.LoanTypeRepository;
 import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.model.solicitude.Solicitude;
+import co.com.pragma.model.exceptions.InvalidFieldException;
 import co.com.pragma.model.solicitude.exceptions.SolicitudeNullException;
-import co.com.pragma.model.solicitude.exceptions.ValueOutOfBoundsException;
+import co.com.pragma.model.exceptions.ValueOutOfBoundsException;
 import co.com.pragma.model.solicitude.gateways.SolicitudeRepository;
 import co.com.pragma.model.state.State;
 import co.com.pragma.model.state.exceptions.StateNotFoundException;
 import co.com.pragma.model.state.gateways.StateRepository;
 import co.com.pragma.model.transaction.gateways.TransactionalPort;
-import co.com.pragma.model.user.User;
-import co.com.pragma.model.user.exceptions.UserNotFoundException;
-import co.com.pragma.model.user.gateways.UserPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +28,6 @@ import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,8 +40,6 @@ class SolicitudeUseCaseTest {
     @Mock
     private SolicitudeRepository solicitudeRepository;
     @Mock
-    private UserPort userPort;
-    @Mock
     private LoggerPort logger;
     @Mock
     private TransactionalPort transactionalPort;
@@ -52,16 +48,13 @@ class SolicitudeUseCaseTest {
     private SolicitudeUseCase solicitudeUseCase;
 
     private Solicitude testSolicitude;
-    private User testUser;
     private LoanType testLoanType;
     private State testState;
+    private JwtData testJwtData;
 
     @BeforeEach
     void setUp() {
-        testUser = User.builder()
-                .idNumber("12345")
-                .email("test@example.com")
-                .build();
+        testJwtData = new JwtData("test@example.com", "CLIENTE", 1, "Test", "12345");
 
         testLoanType = LoanType.builder()
                 .loanTypeId(1)
@@ -85,62 +78,54 @@ class SolicitudeUseCaseTest {
 
     @Test
     void shouldSaveSolicitudeSuccessfully() {
-        Solicitude savedSolicitude = testSolicitude.toBuilder()
-                .solicitudeId(100)
-                .email(testUser.getEmail())
-                .loanType(testLoanType)
-                .state(testState)
-                .build();
 
-        when(userPort.getUserByIdNumber(anyString())).thenReturn(Mono.just(testUser));
         when(loanTypeRepository.findById(anyInt())).thenReturn(Mono.just(testLoanType));
         when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(testState));
-        when(solicitudeRepository.save(any(Solicitude.class))).thenReturn(Mono.just(savedSolicitude));
+        when(solicitudeRepository.save(any(Solicitude.class))).thenAnswer(invocation -> {
+            Solicitude input = invocation.getArgument(0);
+            return Mono.just(input.toBuilder().solicitudeId(100).build());
+        });
 
-        StepVerifier.create(solicitudeUseCase.saveSolicitude(testSolicitude, "12345"))
+        StepVerifier.create(solicitudeUseCase.saveSolicitude(testSolicitude, "12345", testJwtData))
                 .expectNextMatches(result ->
                         result.getSolicitudeId() == 100 &&
-                        result.getEmail().equals("test@example.com") &&
-                        result.getLoanType().getLoanTypeId() == 1 &&
-                        result.getState().getStateId() == 1
+                                result.getEmail().equals(testJwtData.subject()) &&
+                                result.getLoanType().getLoanTypeId() == 1 &&
+                                result.getState().getStateId() == 1
                 )
                 .verifyComplete();
     }
 
     @Test
     void shouldFailWhenInputSolicitudeIsNull() {
-        StepVerifier.create(solicitudeUseCase.saveSolicitude(null, "12345"))
+        StepVerifier.create(solicitudeUseCase.saveSolicitude(null, "12345", testJwtData))
                 .expectError(SolicitudeNullException.class)
                 .verify();
     }
 
     @Test
-    void shouldFailWhenUserIsNotFound() {
-        when(userPort.getUserByIdNumber(anyString())).thenReturn(Mono.error(new UserNotFoundException("User not found","code")));
-
-        StepVerifier.create(solicitudeUseCase.saveSolicitude(testSolicitude, "12345"))
-                .expectError(UserNotFoundException.class)
+    void shouldFailWhenIdNumberDoesNotMatchToken() {
+        StepVerifier.create(solicitudeUseCase.saveSolicitude(testSolicitude, "differentIdNumber", testJwtData))
+                .expectError(InvalidFieldException.class)
                 .verify();
     }
 
     @Test
     void shouldFailWhenLoanTypeIsNotFound() {
-        when(userPort.getUserByIdNumber(anyString())).thenReturn(Mono.just(testUser));
         when(loanTypeRepository.findById(anyInt())).thenReturn(Mono.empty());
         when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(testState));
 
-        StepVerifier.create(solicitudeUseCase.saveSolicitude(testSolicitude, "12345"))
+        StepVerifier.create(solicitudeUseCase.saveSolicitude(testSolicitude, "12345", testJwtData))
                 .expectError(LoanTypeNotFoundException.class)
                 .verify();
     }
 
     @Test
     void shouldFailWhenStateIsNotFound() {
-        when(userPort.getUserByIdNumber(anyString())).thenReturn(Mono.just(testUser));
         when(loanTypeRepository.findById(anyInt())).thenReturn(Mono.just(testLoanType));
         when(stateRepository.findOne(any(State.class))).thenReturn(Mono.empty());
 
-        StepVerifier.create(solicitudeUseCase.saveSolicitude(testSolicitude, "12345"))
+        StepVerifier.create(solicitudeUseCase.saveSolicitude(testSolicitude, "12345", testJwtData))
                 .expectError(StateNotFoundException.class)
                 .verify();
     }
@@ -151,11 +136,10 @@ class SolicitudeUseCaseTest {
                 .value(new BigDecimal("500.00"))
                 .build();
 
-        when(userPort.getUserByIdNumber(anyString())).thenReturn(Mono.just(testUser));
         when(loanTypeRepository.findById(anyInt())).thenReturn(Mono.just(testLoanType));
         when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(testState));
 
-        StepVerifier.create(solicitudeUseCase.saveSolicitude(invalidSolicitude, "12345"))
+        StepVerifier.create(solicitudeUseCase.saveSolicitude(invalidSolicitude, "12345", testJwtData))
                 .expectError(ValueOutOfBoundsException.class)
                 .verify();
     }
@@ -166,11 +150,10 @@ class SolicitudeUseCaseTest {
                 .value(new BigDecimal("25000.00"))
                 .build();
 
-        when(userPort.getUserByIdNumber(anyString())).thenReturn(Mono.just(testUser));
         when(loanTypeRepository.findById(anyInt())).thenReturn(Mono.just(testLoanType));
         when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(testState));
 
-        StepVerifier.create(solicitudeUseCase.saveSolicitude(invalidSolicitude, "12345"))
+        StepVerifier.create(solicitudeUseCase.saveSolicitude(invalidSolicitude, "12345", testJwtData))
                 .expectError(ValueOutOfBoundsException.class)
                 .verify();
     }
@@ -179,12 +162,11 @@ class SolicitudeUseCaseTest {
     void shouldFailWhenRepositorySaveFails() {
         RuntimeException dbException = new RuntimeException("Database connection failed");
 
-        when(userPort.getUserByIdNumber(anyString())).thenReturn(Mono.just(testUser));
         when(loanTypeRepository.findById(anyInt())).thenReturn(Mono.just(testLoanType));
         when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(testState));
         when(solicitudeRepository.save(any(Solicitude.class))).thenReturn(Mono.error(dbException));
 
-        StepVerifier.create(solicitudeUseCase.saveSolicitude(testSolicitude, "12345"))
+        StepVerifier.create(solicitudeUseCase.saveSolicitude(testSolicitude, "12345", testJwtData))
                 .expectErrorMatches(error -> error instanceof RuntimeException && "Database connection failed".equals(error.getMessage()))
                 .verify();
     }
@@ -195,9 +177,8 @@ class SolicitudeUseCaseTest {
                 .deadline(0)
                 .build();
 
-        when(userPort.getUserByIdNumber(anyString())).thenReturn(Mono.just(testUser));
 
-        StepVerifier.create(solicitudeUseCase.saveSolicitude(invalidSolicitude, "12345"))
+        StepVerifier.create(solicitudeUseCase.saveSolicitude(invalidSolicitude, "12345", testJwtData))
                 .expectError()
                 .verify();
     }

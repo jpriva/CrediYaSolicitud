@@ -3,12 +3,13 @@ package co.com.pragma.api.exception.handler;
 import co.com.pragma.api.dto.ErrorDTO;
 import co.com.pragma.model.constants.Errors;
 import co.com.pragma.model.logs.gateways.LoggerPort;
-import co.com.pragma.model.solicitude.exceptions.CustomException;
+import co.com.pragma.model.exceptions.CustomException;
 import lombok.Getter;
 import lombok.Setter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
 
 @WebFluxTest
 @ContextConfiguration(classes = {GlobalExceptionHandler.class, GlobalExceptionHandlerTest.TestController.class})
@@ -63,10 +65,12 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    @WithMockUser(authorities = "CLIENTE")
     void shouldHandleServerWebInputException() {
         String malformedJson = "{\"name\": \"test\"";
 
-        webTestClient.post().uri("/input-error")
+        webTestClient.mutateWith(csrf())
+                .post().uri("/input-error")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(malformedJson)
                 .exchange()
@@ -80,6 +84,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    @WithMockUser
     void shouldHandleCustomExceptionWithClientErrorStatus() {
         webTestClient.get().uri("/custom-409")
                 .exchange()
@@ -93,6 +98,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    @WithMockUser
     void shouldHandleCustomExceptionWithInvalidStatusAsInternalServerError() {
         webTestClient.get().uri("/custom-invalid-status")
                 .exchange()
@@ -102,6 +108,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    @WithMockUser
     void shouldHandleGenericExceptionAsInternalServerError() {
         webTestClient.get().uri("/generic-error")
                 .exchange()

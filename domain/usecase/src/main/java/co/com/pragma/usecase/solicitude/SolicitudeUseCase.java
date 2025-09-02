@@ -3,6 +3,7 @@ package co.com.pragma.usecase.solicitude;
 import co.com.pragma.model.constants.DefaultValues;
 import co.com.pragma.model.constants.Errors;
 import co.com.pragma.model.constants.LogMessages;
+import co.com.pragma.model.jwt.JwtData;
 import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.exceptions.LoanTypeNotFoundException;
 import co.com.pragma.model.loantype.gateways.LoanTypeRepository;
@@ -14,7 +15,6 @@ import co.com.pragma.model.state.State;
 import co.com.pragma.model.state.exceptions.StateNotFoundException;
 import co.com.pragma.model.state.gateways.StateRepository;
 import co.com.pragma.model.transaction.gateways.TransactionalPort;
-import co.com.pragma.model.user.gateways.UserPort;
 import co.com.pragma.usecase.solicitude.utils.SolicitudeUtils;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -22,22 +22,17 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class SolicitudeUseCase {
 
-    // START Injected Properties ****************************************************************
-
     private final LoanTypeRepository loanTypeRepository;
     private final StateRepository stateRepository;
     private final SolicitudeRepository solicitudeRepository;
-    private final UserPort userPort;
     private final LoggerPort logger;
     private final TransactionalPort transactionalPort;
 
-    // END Injected Properties ******************************************************************
-
-    public Mono<Solicitude> saveSolicitude(Solicitude solicitude, String idNumber) {
+    public Mono<Solicitude> saveSolicitude(Solicitude solicitude,String idNumber, JwtData token) {
         return Mono.justOrEmpty(solicitude)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new SolicitudeNullException())))
                 .flatMap(SolicitudeUtils::trim)
-                .flatMap(solicitudeMono -> getSolicitudeEmailByIdNumber(solicitudeMono, idNumber))
+                .flatMap(s-> SolicitudeUtils.validateFromToken(s,idNumber,token))
                 .doOnNext(solicitudeMono -> logger.info("SolicitudeWithEmail [email: {}, value: {}, deadline: {}]",solicitudeMono.getEmail(), solicitudeMono.getValue(),solicitudeMono.getDeadline()))
                 .flatMap(SolicitudeUtils::validateFields)
                 .map(solicitudeMono -> solicitudeMono.toBuilder().state(State.builder().name(DefaultValues.PENDING_STATE).build()).build())
@@ -49,11 +44,6 @@ public class SolicitudeUseCase {
     }
 
     // START Private methods ***********************************************************
-
-    private Mono<Solicitude> getSolicitudeEmailByIdNumber(Solicitude solicitude, String idNumber) {
-        return userPort.getUserByIdNumber(idNumber)
-                .map(user -> solicitude.toBuilder().email(user.getEmail()).build());
-    }
 
     private Mono<Solicitude> saveSolicitudeTransaction(Solicitude solicitude) {
         Mono<LoanType> loanTypeMono = loanTypeRepository.findById(solicitude.getLoanType().getLoanTypeId())

@@ -2,6 +2,9 @@ package co.com.pragma.api;
 
 import co.com.pragma.api.dto.SolicitudeRequestDTO;
 import co.com.pragma.api.mapper.SolicitudeMapper;
+import co.com.pragma.model.exceptions.InvalidCredentialsException;
+import co.com.pragma.model.jwt.JwtData;
+import co.com.pragma.model.jwt.gateways.JwtProviderPort;
 import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.usecase.solicitude.SolicitudeUseCase;
 import lombok.RequiredArgsConstructor;
@@ -18,14 +21,22 @@ public class Handler {
     private final SolicitudeUseCase solicitudeUseCase;
     private final LoggerPort logger;
     private final SolicitudeMapper solicitudeMapper;
+    private final JwtProviderPort jwtProvider;
+
 
     public Mono<ServerResponse> listenPOSTSaveSolicitudeUseCase(ServerRequest serverRequest) {
-        return serverRequest.bodyToMono(SolicitudeRequestDTO.class)
-                .flatMap(request ->
+        Mono<JwtData> tokenMono = Mono.justOrEmpty(serverRequest.headers().firstHeader("Authorization"))
+                .filter(header -> header.startsWith("Bearer "))
+                .map(bearer -> bearer.substring(7))
+                .map(jwtProvider::getClaims)
+                .switchIfEmpty(Mono.error(new InvalidCredentialsException()));
+
+        Mono<SolicitudeRequestDTO> solicitudeMono = serverRequest.bodyToMono(SolicitudeRequestDTO.class);
+
+        return Mono.zip(solicitudeMono, tokenMono)
+                .flatMap(tuple ->
                         solicitudeUseCase.saveSolicitude(
-                                solicitudeMapper.toDomain(request),
-                                request.getIdNumber()
-                        )
+                                solicitudeMapper.toDomain(tuple.getT1()), tuple.getT1().getIdNumber(), tuple.getT2())
                 )
                 .map(solicitudeMapper::toResponseDto)
                 .flatMap(savedSolicitude ->
