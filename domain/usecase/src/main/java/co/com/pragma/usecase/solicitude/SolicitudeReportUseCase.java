@@ -4,10 +4,12 @@ import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.model.solicitude.gateways.SolicitudeRepository;
 import co.com.pragma.model.solicitude.reports.SolicitudeReport;
 import co.com.pragma.model.solicitude.reports.SolicitudeReportFilter;
+import co.com.pragma.model.user.UserProjection;
 import co.com.pragma.model.user.gateways.UserPort;
 import co.com.pragma.usecase.solicitude.utils.ReportUtils;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 public class SolicitudeReportUseCase {
@@ -29,6 +31,30 @@ public class SolicitudeReportUseCase {
     }
 
     public Flux<SolicitudeReport> getSolicitudeReport(SolicitudeReportFilter filter) {
+        return Mono.just(filter)
+                .flatMapMany(solicitudeFilter ->
+                        ReportUtils.hasClientFilters(solicitudeFilter)
+                                ? getUsersFirst(solicitudeFilter)
+                                : getSolicitudesFirst(solicitudeFilter)
+                );
+    }
+
+    private Flux<SolicitudeReport> getUsersFirst(SolicitudeReportFilter filter) {
+        logger.info("Client filters detected. Fetching users first.");
+        return userPort.getUserByFilter(filter)
+                .collectMap(UserProjection::getEmail)
+                .flatMapMany(usersMap ->
+                        repository.findSolicitudeReport(
+                                        filter.toBuilder().emailsIn(usersMap.keySet().stream().toList()
+                                        ).build())
+                                .map(report ->
+                                        ReportUtils.buildReport(report, usersMap.get(report.getClientEmail()))
+                                )
+                );
+    }
+
+    private Flux<SolicitudeReport> getSolicitudesFirst(SolicitudeReportFilter filter) {
+        logger.info("No client filters detected. Fetching solicitudes first.");
         return repository.findSolicitudeReport(filter)
                 .collectList()
                 .filter(solicitudes -> !solicitudes.isEmpty())

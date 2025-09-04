@@ -1,6 +1,7 @@
 package co.com.pragma.usecase.solicitude.utils;
 
 import co.com.pragma.model.solicitude.reports.SolicitudeReport;
+import co.com.pragma.model.solicitude.reports.SolicitudeReportFilter;
 import co.com.pragma.model.user.UserProjection;
 import co.com.pragma.model.user.gateways.UserPort;
 import lombok.NoArgsConstructor;
@@ -55,5 +56,13 @@ public class ReportUtils {
                                 usersMap.get(solicitude.getClientEmail())
                         )
                 );
+    }
+
+    public static boolean hasClientFilters(SolicitudeReportFilter filter) {
+        return (filter.getClientEmail() != null && !filter.getClientEmail().isBlank()) ||
+                (filter.getClientName() != null && !filter.getClientName().isBlank()) ||
+                (filter.getClientIdNumber() != null && !filter.getClientIdNumber().isBlank()) ||
+                (filter.getMinBaseSalary() != null) ||
+                (filter.getMaxBaseSalary() != null);
     }
 }

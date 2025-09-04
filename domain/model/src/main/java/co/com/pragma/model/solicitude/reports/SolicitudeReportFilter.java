@@ -3,12 +3,13 @@ package co.com.pragma.model.solicitude.reports;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class SolicitudeReportFilter {
 
     private String clientEmail;
@@ -20,6 +21,7 @@ public class SolicitudeReportFilter {
     private BigDecimal maxValue;
     private BigDecimal minBaseSalary;
     private BigDecimal maxBaseSalary;
+    private List<String> emailsIn;
 
     private int page;
     private int size;

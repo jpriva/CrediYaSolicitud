@@ -7,6 +7,7 @@ import co.com.pragma.model.solicitude.reports.SolicitudeReportFilter;
 import co.com.pragma.model.user.UserProjection;
 import co.com.pragma.model.user.gateways.UserPort;
 import co.com.pragma.webclient.config.WebClientProperties;
+import co.com.pragma.webclient.constants.WebClientConstants.RequestParams;
 import co.com.pragma.webclient.dto.UserDTO;
 import co.com.pragma.webclient.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -103,7 +104,7 @@ public class UserAdapter implements UserPort {
                         clientResponse -> clientResponse.bodyToMono(String.class)
                                 .flatMap(errorBody -> {
                                     logger.error("Error from user service when fetching by emails. Status: {}, Body: {}", clientResponse.statusCode(), errorBody);
-                                    return Mono.error(new UserGatewayException("Error from user service", "GW-001"));
+                                    return Mono.error(new UserGatewayException(Errors.USER_GATEWAY_ERROR_FROM_SERVICE, Errors.USER_GATEWAY_ERROR_FROM_SERVICE_CODE));
                                 })
                 ).bodyToMono(UserDTO.class);
     }
@@ -112,11 +113,16 @@ public class UserAdapter implements UserPort {
         return webClient.get()
                 .uri(uriBuilder -> {
                     uriBuilder.path(properties.getPathUsersByFilter());
-                    if (filter.getClientEmail() != null) uriBuilder.queryParam("email", filter.getClientEmail());
-                    if (filter.getClientName() != null) uriBuilder.queryParam("name", filter.getClientName());
-                    if (filter.getClientIdNumber() != null) uriBuilder.queryParam("idNumber", filter.getClientIdNumber());
-                    if (filter.getMinBaseSalary() != null) uriBuilder.queryParam("minBaseSalary", filter.getMinBaseSalary());
-                    if (filter.getMaxBaseSalary() != null) uriBuilder.queryParam("maxBaseSalary", filter.getMaxBaseSalary());
+                    if (filter.getClientEmail() != null)
+                        uriBuilder.queryParam(RequestParams.EMAIL, filter.getClientEmail());
+                    if (filter.getClientName() != null)
+                        uriBuilder.queryParam(RequestParams.NAME, filter.getClientName());
+                    if (filter.getClientIdNumber() != null)
+                        uriBuilder.queryParam(RequestParams.ID_NUMBER, filter.getClientIdNumber());
+                    if (filter.getMinBaseSalary() != null)
+                        uriBuilder.queryParam(RequestParams.MIN_BASE_SALARY, filter.getMinBaseSalary());
+                    if (filter.getMaxBaseSalary() != null)
+                        uriBuilder.queryParam(RequestParams.MAX_BASE_SALARY, filter.getMaxBaseSalary());
                     return uriBuilder.build();
                 })
                 .retrieve()

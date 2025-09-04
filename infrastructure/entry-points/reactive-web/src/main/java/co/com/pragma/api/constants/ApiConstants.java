@@ -119,4 +119,23 @@ public class ApiConstants {
         public static final String EXAMPLE_RES_BASE_SALARY = "3500000.00";
         public static final String EXAMPLE_RES_TOTAL_DEBT = "1500000.00";
     }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class FilterParams {
+        public static final String CLIENT_EMAIL = "clientEmail";
+        public static final String CLIENT_NAME = "clientName";
+        public static final String CLIENT_IDENTIFICATION = "clientIdentification";
+        public static final String LOAN_TYPE = "loanType";
+        public static final String STATE = "state";
+        public static final String MIN_VALUE = "minValue";
+        public static final String MAX_VALUE = "maxValue";
+        public static final String MIN_BASE_SALARY = "minBaseSalary";
+        public static final String MAX_BASE_SALARY = "maxBaseSalary";
+        public static final String PAGE = "page";
+        public static final int DEFAULT_PAGE = 0;
+        public static final String SIZE = "size";
+        public static final int DEFAULT_SIZE = 10;
+        public static final String SORT_BY = "sortBy";
+        public static final String SORT_DIRECTION = "sortDirection";
+    }
 }

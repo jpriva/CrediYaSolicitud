@@ -64,7 +64,20 @@ public class SolicitudeReportUtils {
     }
 
     public static void addSolicitudeReportFilters(StringBuilder whereClause, Map<String, Object> params, SolicitudeReportFilter filter) {
-        addFilter(whereClause, params, "s.email", filter.getClientEmail(), "clientEmail", true);
+
+        //Not Showing Aproved State if is not filter by state
+        if (filter.getStateName() != null && !filter.getStateName().isBlank()) {
+            whereClause.append(" AND e.nombre != '")
+                    .append(DefaultValues.APPROVED_STATE)
+                    .append("'");
+        }
+
+        if (filter.getEmailsIn() != null && !filter.getEmailsIn().isEmpty()) {
+            whereClause.append(" AND s.email IN (:emailsIn)");
+            params.put("emailsIn", filter.getEmailsIn());
+        } else {
+            addFilter(whereClause, params, "s.email", filter.getClientEmail(), "clientEmail", true);
+        }
         addFilter(whereClause, params, "tp.nombre", filter.getLoanTypeName(), "loanTypeName", true);
         addFilter(whereClause, params, "e.nombre", filter.getStateName(), "stateName", false);
 

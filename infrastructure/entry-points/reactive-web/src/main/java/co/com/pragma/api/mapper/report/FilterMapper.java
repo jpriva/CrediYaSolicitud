@@ -1,5 +1,6 @@
 package co.com.pragma.api.mapper.report;
 
+import co.com.pragma.api.constants.ApiConstants.FilterParams;
 import co.com.pragma.model.solicitude.reports.SolicitudeReportFilter;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -14,22 +15,22 @@ public class FilterMapper {
 
         SolicitudeReportFilter.SolicitudeReportFilterBuilder builder = SolicitudeReportFilter.builder();
 
-        getParam(params, "clientEmail").ifPresent(builder::clientEmail);
-        getParam(params, "clientName").ifPresent(builder::clientName);
-        getParam(params, "clientIdentification").ifPresent(builder::clientIdNumber);
-        getParam(params, "loanType").ifPresent(builder::loanTypeName);
-        getParam(params, "state").ifPresent(builder::stateName);
+        getParam(params, FilterParams.CLIENT_EMAIL).ifPresent(builder::clientEmail);
+        getParam(params, FilterParams.CLIENT_NAME).ifPresent(builder::clientName);
+        getParam(params, FilterParams.CLIENT_IDENTIFICATION).ifPresent(builder::clientIdNumber);
+        getParam(params, FilterParams.LOAN_TYPE).ifPresent(builder::loanTypeName);
+        getParam(params, FilterParams.STATE).ifPresent(builder::stateName);
 
-        getBigDecimalParam(params, "minValue").ifPresent(builder::minValue);
-        getBigDecimalParam(params, "maxValue").ifPresent(builder::maxValue);
-        getBigDecimalParam(params, "minBaseSalary").ifPresent(builder::minBaseSalary);
-        getBigDecimalParam(params, "maxBaseSalary").ifPresent(builder::maxBaseSalary);
+        getBigDecimalParam(params, FilterParams.MIN_VALUE).ifPresent(builder::minValue);
+        getBigDecimalParam(params, FilterParams.MAX_VALUE).ifPresent(builder::maxValue);
+        getBigDecimalParam(params, FilterParams.MIN_BASE_SALARY).ifPresent(builder::minBaseSalary);
+        getBigDecimalParam(params, FilterParams.MAX_BASE_SALARY).ifPresent(builder::maxBaseSalary);
 
-        builder.page(getIntParam(params, "page").orElse(0));
-        builder.size(getIntParam(params, "size").orElse(10));
+        builder.page(getIntParam(params, FilterParams.PAGE).orElse(FilterParams.DEFAULT_PAGE));
+        builder.size(getIntParam(params, FilterParams.SIZE).orElse(FilterParams.DEFAULT_SIZE));
 
-        getParam(params, "sortBy").ifPresent(builder::sortBy);
-        getParam(params, "sortDirection").ifPresent(builder::sortDirection);
+        getParam(params, FilterParams.SORT_BY).ifPresent(builder::sortBy);
+        getParam(params, FilterParams.SORT_DIRECTION).ifPresent(builder::sortDirection);
 
         return builder
                 .build();
