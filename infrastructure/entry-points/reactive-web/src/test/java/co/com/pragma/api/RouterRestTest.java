@@ -7,6 +7,7 @@ import co.com.pragma.api.dto.solicitude.SolicitudeRequestDTO;
 import co.com.pragma.api.dto.solicitude.SolicitudeResponseDTO;
 import co.com.pragma.api.exception.handler.CustomAccessDeniedHandler;
 import co.com.pragma.api.exception.handler.GlobalExceptionHandler;
+import co.com.pragma.api.mapper.report.SolicitudeReportMapper;
 import co.com.pragma.api.mapper.solicitude.SolicitudeMapper;
 import co.com.pragma.api.solicitude.SolicitudeHandler;
 import co.com.pragma.api.solicitude.SolicitudeRouterRest;
@@ -15,6 +16,7 @@ import co.com.pragma.model.jwt.gateways.JwtProviderPort;
 import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.model.solicitude.Solicitude;
 import co.com.pragma.model.exceptions.CustomException;
+import co.com.pragma.usecase.solicitude.SolicitudeReportUseCase;
 import co.com.pragma.usecase.solicitude.SolicitudeUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +58,12 @@ class RouterRestTest {
 
     @MockitoBean
     private JwtProviderPort jwtProvider;
+
+    @MockitoBean
+    private SolicitudeReportUseCase solicitudeReportUseCase;
+
+    @MockitoBean
+    private SolicitudeReportMapper solicitudeReportMapper;
 
     @Test
     @WithMockUser(authorities = "CLIENTE")

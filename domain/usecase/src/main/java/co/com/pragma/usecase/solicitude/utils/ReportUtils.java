@@ -26,6 +26,10 @@ public class ReportUtils {
             UserPort userPort,
             List<SolicitudeReport> solicitudes
     ) {
+        if (solicitudes == null || solicitudes.isEmpty()) {
+            return Flux.empty();
+        }
+
         return getMapOfUsersFromService(userPort, solicitudes)
                 .flatMapMany(usersMap ->
                         combineUsersAndSolicitudesIntoFlux(solicitudes, usersMap)

@@ -43,6 +43,7 @@ public class SolicitudeReportUseCase {
         logger.info("Client filters detected. Fetching users first.");
         return userPort.getUserByFilter(filter)
                 .collectMap(UserProjection::getEmail)
+                .filter(map -> !map.isEmpty())
                 .flatMapMany(usersMap ->
                         repository.findSolicitudeReport(
                                         filter.toBuilder().emailsIn(usersMap.keySet().stream().toList()

@@ -69,14 +69,14 @@ public class WebClientConfig {
                 })
                 .switchIfEmpty(next.exchange(clientRequest));
     }
-    private ExchangeFilterFunction logRequest() {
+    public ExchangeFilterFunction logRequest() {
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
             logger.info("Request: {} {}", clientRequest.method(), clientRequest.url());
             return Mono.just(clientRequest);
         });
     }
 
-    private ExchangeFilterFunction logResponse() {
+    public ExchangeFilterFunction logResponse() {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
             logger.info("Response Status: {}", clientResponse.statusCode());
             return Mono.just(clientResponse);

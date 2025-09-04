@@ -40,10 +40,6 @@ public class UserAdapter implements UserPort {
                 .doOnComplete(() ->
                         logger.debug("Successfully retrieved users for {} emails.", emails != null ? emails.size() : 0)
                 )
-                .onErrorMap(
-                        ex -> !(ex instanceof UserGatewayException),
-                        ex -> new UserGatewayException(Errors.USER_GATEWAY_COMMUNICATION_FAILED, Errors.USER_GATEWAY_COMMUNICATION_FAILED_CODE)
-                )
                 .doOnError(ex ->
                         logger.error("Failed to communicate with user service for bulk email fetch.", ex)
                 );
@@ -68,10 +64,6 @@ public class UserAdapter implements UserPort {
                 .doOnComplete(() ->
                         logger.debug("Successfully retrieved users.")
                 )
-                .onErrorMap(
-                        ex -> !(ex instanceof UserGatewayException),
-                        ex -> new UserGatewayException(Errors.USER_GATEWAY_COMMUNICATION_FAILED, Errors.USER_GATEWAY_COMMUNICATION_FAILED_CODE)
-                )
                 .doOnError(ex ->
                         logger.error("Failed to communicate with user service for bulk email fetch.", ex)
                 );
@@ -80,6 +72,7 @@ public class UserAdapter implements UserPort {
     //PRIVATE Methods ****************************************************************
 
     private Flux<UserDTO> retrieveUsersByEmailsFromService(List<String> emails) {
+        logger.info("Sending request to user service for emails: {}", emails);
         return webClient
                 .post()
                 .uri(properties.getPathUsersByEmails())
@@ -96,6 +89,7 @@ public class UserAdapter implements UserPort {
     }
 
     private Mono<UserDTO> retrieveUserByEmailFromService(String email) {
+        logger.info("Requesting user data from external service for email: {}", email);
         return webClient.get()
                 .uri(properties.getPathUserByEmail() + email)
                 .retrieve()
@@ -110,6 +104,7 @@ public class UserAdapter implements UserPort {
     }
 
     private Flux<UserDTO> retrieveUserByFilterFromService(SolicitudeReportFilter filter) {
+        logger.info("Requesting users by filter: {}", filter);
         return webClient.get()
                 .uri(uriBuilder -> {
                     uriBuilder.path(properties.getPathUsersByFilter());

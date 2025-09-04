@@ -1,10 +1,12 @@
 package co.com.pragma.api.config;
 
+import co.com.pragma.api.mapper.report.SolicitudeReportMapper;
 import co.com.pragma.api.solicitude.SolicitudeHandler;
 import co.com.pragma.api.solicitude.SolicitudeRouterRest;
 import co.com.pragma.api.mapper.solicitude.SolicitudeMapper;
 import co.com.pragma.model.jwt.gateways.JwtProviderPort;
 import co.com.pragma.model.logs.gateways.LoggerPort;
+import co.com.pragma.usecase.solicitude.SolicitudeReportUseCase;
 import co.com.pragma.usecase.solicitude.SolicitudeUseCase;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,12 @@ class ConfigTest {
 
     @MockitoBean
     private JwtProviderPort jwtProvider;
+
+    @MockitoBean
+    private SolicitudeReportUseCase solicitudeReportUseCase;
+
+    @MockitoBean
+    private SolicitudeReportMapper solicitudeReportMapper;
 
     @Test
     void corsConfigurationShouldAllowOrigins() {

@@ -1,5 +1,6 @@
 package co.com.pragma.r2dbc.reports;
 
+import co.com.pragma.model.constants.DefaultValues;
 import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.model.solicitude.reports.SolicitudeReport;
 import co.com.pragma.model.solicitude.reports.SolicitudeReportFilter;
@@ -26,6 +27,7 @@ public class SolicitudeEntityRepositoryImpl implements SolicitudeEntityRepositor
         String baseQuery = SolicitudeReportUtils.baseQuery(SolicitudeReportUtils.queryFields());
 
         Map<String, Object> params = new HashMap<>();
+        params.put("approvedStateForSubquery", DefaultValues.APPROVED_STATE);
         StringBuilder whereClause = new StringBuilder(" WHERE 1=1");
         SolicitudeReportUtils.addSolicitudeReportFilters(whereClause, params, filter);
 

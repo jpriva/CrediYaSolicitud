@@ -31,9 +31,8 @@ public class SolicitudeReportUtils {
                      JOIN tipo_prestamo tpx ON tpx.id_tipo_prestamo = sx.id_tipo_prestamo
                      JOIN estados ex ON ex.id_estado = sx.id_estado
                      WHERE sx.email = s.email
-                     AND ex.nombre ="""
-                + " '" + DefaultValues.APPROVED_STATE + "'"
-                + ") AS totalMonthlyValueApproved";
+                     AND ex.nombre = :approvedStateForSubquery
+                ) AS totalMonthlyValueApproved""";
     }
 
     public static String queryFields() {
@@ -48,6 +47,7 @@ public class SolicitudeReportUtils {
 
                 //SUM( V * [I*(1+I)^D] / [(1+I)^(D-1)] )
                 .add(Fields.TOTAL_MONTHLY_VALUE);
+
         return fieldsJoiner.toString();
     }
 
@@ -65,11 +65,9 @@ public class SolicitudeReportUtils {
 
     public static void addSolicitudeReportFilters(StringBuilder whereClause, Map<String, Object> params, SolicitudeReportFilter filter) {
 
-        //Not Showing Aproved State if is not filter by state
-        if (filter.getStateName() != null && !filter.getStateName().isBlank()) {
-            whereClause.append(" AND e.nombre != '")
-                    .append(DefaultValues.APPROVED_STATE)
-                    .append("'");
+        if (filter.getStateName() == null || filter.getStateName().isBlank()) {
+            whereClause.append(" AND e.nombre != :defaultApprovedState");
+            params.put("defaultApprovedState", DefaultValues.APPROVED_STATE);
         }
 
         if (filter.getEmailsIn() != null && !filter.getEmailsIn().isEmpty()) {
@@ -99,7 +97,7 @@ public class SolicitudeReportUtils {
                 case "state" -> "e.nombre";
                 default -> "s.id_solicitud";
             };
-            String direction = "DESC".equalsIgnoreCase(filter.getSortDirection()) ? "DESC" : "ASC";
+            String direction = !"ASC".equalsIgnoreCase(filter.getSortDirection()) ? "DESC" : "ASC";
             return " ORDER BY " + sortField + " " + direction;
         }
         return " ORDER BY s.id_solicitud DESC";
