@@ -9,7 +9,6 @@ import reactor.core.publisher.Flux;
 public class LoanTypeUseCase {
     private final LoanTypeRepository loanTypeRepository;
 
-
     public Flux<LoanType> getAllLoanTypes() {
         return loanTypeRepository.findAll();
     }

@@ -1,6 +1,6 @@
-package co.com.pragma.api.mapper;
+package co.com.pragma.api.mapper.solicitude;
 
-import co.com.pragma.api.dto.LoanTypeResponseDTO;
+import co.com.pragma.api.dto.solicitude.LoanTypeResponseDTO;
 import co.com.pragma.model.loantype.LoanType;
 import org.mapstruct.Mapper;
 

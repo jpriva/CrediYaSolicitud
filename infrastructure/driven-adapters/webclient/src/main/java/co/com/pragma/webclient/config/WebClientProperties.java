@@ -9,5 +9,8 @@ public class WebClientProperties {
 
     private String url = "http://localhost:8081";
     private int timeout = 5000;
+    private String pathUsersByEmails;
+    private String pathUserByEmail;
+    private String pathUsersByFilter;
 
 }

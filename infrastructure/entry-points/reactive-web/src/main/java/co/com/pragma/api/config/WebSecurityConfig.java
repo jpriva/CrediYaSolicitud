@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -43,14 +44,19 @@ public class WebSecurityConfig {
                         .pathMatchers(
                                 ApiPathMatchers.API_DOCS_MATCHER,
                                 ApiPathMatchers.SWAGGER_UI_MATCHER,
-                                ApiConstants.ApiPaths.SWAGGER_PATH,
-                                ApiPathMatchers.WEB_JARS_MATCHER,
+                                ApiConstants.ApiPath.SWAGGER_PATH,
+                                ApiPathMatchers.LOAN_TYPE_MATCHER,
+                                ApiPathMatchers.STATE_MATCHER,
                                 ApiPathMatchers.TEST_MATCHER
                         ).permitAll()
                         .pathMatchers(
-                                ApiPathMatchers.SOLICITUDE_MATCHER
+                                HttpMethod.POST,ApiPathMatchers.SOLICITUDE_MATCHER
                         ).hasAnyAuthority(
                                 ApiConstants.Role.CLIENT_ROLE_NAME
+                        ).pathMatchers(
+                                HttpMethod.GET,ApiPathMatchers.SOLICITUDE_MATCHER
+                        ).hasAnyAuthority(
+                                ApiConstants.Role.ADVISOR_ROLE_NAME
                         ).anyExchange().authenticated()
                 )
                 .exceptionHandling(spec ->
@@ -75,7 +81,7 @@ public class WebSecurityConfig {
                     JwtData jwtData = jwtProvider.getClaims(authToken);
                     String email = jwtData.subject();
                     List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(jwtData.role()));
-                    Authentication auth = new UsernamePasswordAuthenticationToken(email, null, authorities);
+                    Authentication auth = new UsernamePasswordAuthenticationToken(email, authToken, authorities);
                     return Mono.just(new SecurityContextImpl(auth));
                 } catch (Exception e) {
                     return Mono.error(new InvalidCredentialsException());

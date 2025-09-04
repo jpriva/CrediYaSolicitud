@@ -1,6 +1,6 @@
-package co.com.pragma.api.mapper;
+package co.com.pragma.api.mapper.solicitude;
 
-import co.com.pragma.api.dto.StateResponseDTO;
+import co.com.pragma.api.dto.solicitude.StateResponseDTO;
 import co.com.pragma.model.state.State;
 import org.mapstruct.Mapper;
 

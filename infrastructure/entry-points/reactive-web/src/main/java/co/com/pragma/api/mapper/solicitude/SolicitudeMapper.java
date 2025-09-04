@@ -1,7 +1,7 @@
-package co.com.pragma.api.mapper;
+package co.com.pragma.api.mapper.solicitude;
 
-import co.com.pragma.api.dto.SolicitudeRequestDTO;
-import co.com.pragma.api.dto.SolicitudeResponseDTO;
+import co.com.pragma.api.dto.solicitude.SolicitudeRequestDTO;
+import co.com.pragma.api.dto.solicitude.SolicitudeResponseDTO;
 import co.com.pragma.model.solicitude.Solicitude;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

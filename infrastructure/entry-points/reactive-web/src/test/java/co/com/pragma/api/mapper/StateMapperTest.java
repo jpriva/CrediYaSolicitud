@@ -1,6 +1,7 @@
 package co.com.pragma.api.mapper;
 
-import co.com.pragma.api.dto.StateResponseDTO;
+import co.com.pragma.api.dto.solicitude.StateResponseDTO;
+import co.com.pragma.api.mapper.solicitude.StateMapper;
 import co.com.pragma.model.state.State;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

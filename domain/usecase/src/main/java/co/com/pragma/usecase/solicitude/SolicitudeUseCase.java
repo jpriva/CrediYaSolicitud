@@ -43,6 +43,20 @@ public class SolicitudeUseCase {
                 .as(transactionalPort::transactional);
     }
 
+    public Mono<Solicitude> approveSolicitude(Integer solicitudeId){
+        return solicitudeRepository.findById(solicitudeId)
+                .switchIfEmpty(Mono.error(new SolicitudeNullException()))
+                .flatMap(solicitude ->
+                        solicitudeRepository.save(
+                                solicitude.toBuilder()
+                                        .state(State.builder()
+                                                .name(DefaultValues.APPROVED_STATE)
+                                                .build()
+                                        ).build()
+                        )
+                );
+    }
+
     // START Private methods ***********************************************************
 
     private Mono<Solicitude> saveSolicitudeTransaction(Solicitude solicitude) {

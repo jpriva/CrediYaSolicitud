@@ -1,9 +1,11 @@
-package co.com.pragma.api;
+package co.com.pragma.api.solicitude.documentation;
 
+import co.com.pragma.api.solicitude.SolicitudeHandler;
+import co.com.pragma.api.constants.ApiConstants;
 import co.com.pragma.api.constants.Constants;
 import co.com.pragma.api.dto.ErrorDTO;
-import co.com.pragma.api.dto.SolicitudeRequestDTO;
-import co.com.pragma.api.dto.SolicitudeResponseDTO;
+import co.com.pragma.api.dto.reports.SolicitudeReportRequestDTO;
+import co.com.pragma.api.dto.reports.SolicitudeReportResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,50 +21,43 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static co.com.pragma.api.constants.Constants.API_SOLICITUDE_PATH;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 
 @Configuration
-public class RouterRest {
+public class ReportsDocumentation {
     @Bean
     @RouterOperations({
             @RouterOperation(
-                    path = API_SOLICITUDE_PATH,
+                    path = ApiConstants.ApiPath.API_REPORT_PATH,
                     produces = {MediaType.APPLICATION_JSON_VALUE},
                     method = RequestMethod.POST,
-                    beanClass = Handler.class,
-                    beanMethod = "listenPOSTSaveSolicitudeUseCase",
+                    beanClass = SolicitudeHandler.class,
+                    beanMethod = "listenPOSTSolicitudeReportUseCase",
                     operation = @Operation(
-                            operationId = Constants.OPERATION_SAVE_SOLICITUDE_ID,
+                            operationId = Constants.OPERATION_REPORT_SOLICITUDE_ID,
                             requestBody = @RequestBody(
                                     content = @Content(
-                                            schema = @Schema(implementation = SolicitudeRequestDTO.class)
+                                            schema = @Schema(implementation = SolicitudeReportRequestDTO.class)
                                     ),
                                     required = true,
-                                    description = Constants.OPERATION_SAVE_SOLICITUDE_BODY_DESC
+                                    description = Constants.OPERATION_REPORT_BODY_DESC
                             ),
                             responses = {
                                     @ApiResponse(
-                                            responseCode = Constants.RESPONSE_CREATED_CODE,
-                                            description = Constants.RESPONSE_SAVE_SOLICITUDE_CREATED_DESC,
-                                            content = @Content(schema = @Schema(implementation = SolicitudeResponseDTO.class))
+                                            responseCode = Constants.RESPONSE_OK_CODE,
+                                            description = Constants.RESPONSE_REPORT_OK_DESC,
+                                            content = @Content(schema = @Schema(implementation = SolicitudeReportResponseDTO.class))
                                     ),
                                     @ApiResponse(
                                             responseCode = Constants.RESPONSE_BAD_REQUEST_CODE,
                                             description = Constants.RESPONSE_SAVE_SOLICITUDE_BAD_REQUEST_DESC,
-                                            content = @Content(schema = @Schema(implementation = ErrorDTO.class))
-                                    ),
-                                    @ApiResponse(
-                                            responseCode = Constants.RESPONSE_CONFLICT_CODE,
-                                            description = Constants.RESPONSE_SAVE_SOLICITUDE_CONFLICT_DESC,
                                             content = @Content(schema = @Schema(implementation = ErrorDTO.class))
                                     )
                             }
                     )
             )
     })
-    public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return RouterFunctions.route()
-                .POST(API_SOLICITUDE_PATH, handler::listenPOSTSaveSolicitudeUseCase)
-                .build();
+    public RouterFunction<ServerResponse> reportDocumentationRoutes() {
+        return RouterFunctions.route(GET(ApiConstants.ApiPath.DUMMY_REPORT_DOC_ROUTE), req -> ServerResponse.ok().build());
     }
 }

@@ -10,6 +10,8 @@ import co.com.pragma.model.exceptions.FieldBlankException;
 import co.com.pragma.model.exceptions.FieldSizeOutOfBounds;
 import co.com.pragma.model.exceptions.InvalidFieldException;
 import co.com.pragma.model.exceptions.ValueOutOfBoundsException;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
@@ -19,10 +21,8 @@ import java.util.StringJoiner;
 import static co.com.pragma.model.constants.DefaultValues.DECIMAL_FORMAT;
 import static co.com.pragma.usecase.utils.ValidationUtils.validateCondition;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SolicitudeUtils {
-
-    private SolicitudeUtils() {
-    }
 
     public static Mono<Solicitude> trim(Solicitude solicitude) {
         return Mono.fromCallable(() -> solicitude.toBuilder()

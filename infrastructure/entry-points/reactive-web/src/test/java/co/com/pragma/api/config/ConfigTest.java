@@ -1,8 +1,8 @@
 package co.com.pragma.api.config;
 
-import co.com.pragma.api.Handler;
-import co.com.pragma.api.RouterRest;
-import co.com.pragma.api.mapper.SolicitudeMapper;
+import co.com.pragma.api.solicitude.SolicitudeHandler;
+import co.com.pragma.api.solicitude.SolicitudeRouterRest;
+import co.com.pragma.api.mapper.solicitude.SolicitudeMapper;
 import co.com.pragma.model.jwt.gateways.JwtProviderPort;
 import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.usecase.solicitude.SolicitudeUseCase;
@@ -16,7 +16,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 import static co.com.pragma.api.constants.Constants.API_SOLICITUDE_PATH;
 
-@ContextConfiguration(classes = {RouterRest.class, Handler.class})
+@ContextConfiguration(classes = {SolicitudeRouterRest.class, SolicitudeHandler.class})
 @WebFluxTest
 @Import({CorsConfig.class, SecurityHeadersConfig.class})
 class ConfigTest {

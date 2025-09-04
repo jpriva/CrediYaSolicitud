@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 public class Errors {
 
     public static final String SOLICITUDE_NULL_CODE = "S001";
-    public static final String SOLICITUDE_NULL = "Application is null.";
+    public static final String SOLICITUDE_NULL = "Application not found.";
 
     public static final String REQUIRED_FIELDS_CODE = "S002";
     public static final String REQUIRED_FIELDS = "is a required field and must be provided.";
@@ -52,5 +52,11 @@ public class Errors {
 
     public static final String ACCESS_DENIED_CODE = "AD001";
     public static final String ACCESS_DENIED = "Access denied. You do not have the necessary permissions to access this resource.";
+
+    public static final String USER_GATEWAY_COMMUNICATION_FAILED = "Communication failed with user service";
+    public static final String USER_GATEWAY_COMMUNICATION_FAILED_CODE = "GW-002";
+
+    public static final String USER_GATEWAY_ERROR_FROM_SERVICE = "Error from user service";
+    public static final String USER_GATEWAY_ERROR_FROM_SERVICE_CODE = "GW-001";
 
 }

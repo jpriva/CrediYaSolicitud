@@ -1,6 +1,7 @@
 package co.com.pragma.api.mapper;
 
-import co.com.pragma.api.dto.LoanTypeResponseDTO;
+import co.com.pragma.api.dto.solicitude.LoanTypeResponseDTO;
+import co.com.pragma.api.mapper.solicitude.LoanTypeMapper;
 import co.com.pragma.model.loantype.LoanType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

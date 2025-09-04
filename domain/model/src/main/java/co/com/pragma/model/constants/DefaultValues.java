@@ -11,6 +11,11 @@ public class DefaultValues {
     public static final String PENDING_STATE = "PENDIENTE";
     public static final String APPROVED_STATE = "APROBADO";
     public static final String REJECTED_STATE = "RECHAZADO";
+    public static final String MANUAL_STATE = "MANUAL";
+    public static final String PENDING_STATE_DESC = "La solicitud está pendiente de revisión.";
+    public static final String APPROVED_STATE_DESC = "La solicitud ha sido aprobada.";
+    public static final String REJECTED_STATE_DESC = "La solicitud ha sido rechazada.";
+    public static final String MANUAL_STATE_DESC = "La solicitud está pendiente de revisión manual.";
 
     public static final String VALUE_FIELD = "Value";
     public static final String DEADLINE_FIELD = "Deadline";

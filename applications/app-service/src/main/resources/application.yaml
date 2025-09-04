@@ -27,6 +27,9 @@ adapters:
   restconsumer:
     url: "http://localhost:8081"
     timeout: 5000
+    pathUsersByEmails: "/api/v1/busquedas/emails"
+    pathUserByEmail: "/api/v1/busquedas/email/"
+    pathUsersByFilter: "/api/v1/busquedas/filtro"
 
 
 management:
@@ -58,4 +61,6 @@ security:
     secret: 6wmLjTUj5h4CXtp23BPjlr2IouInKGEBhqVi+LkR1KlIisuE4dKm4vbwWhUKwPsg53CjqX5Uu2L8TshpLXPdWA==
     expiration: 3600
 
-
+logging:
+  level:
+    co.com.pragma.webclient.config.WebClientConfig: INFO

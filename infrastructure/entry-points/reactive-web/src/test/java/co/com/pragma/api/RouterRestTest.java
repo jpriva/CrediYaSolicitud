@@ -3,11 +3,13 @@ package co.com.pragma.api;
 import co.com.pragma.api.config.WebSecurityConfig;
 import co.com.pragma.api.constants.Constants;
 import co.com.pragma.api.dto.ErrorDTO;
-import co.com.pragma.api.dto.SolicitudeRequestDTO;
-import co.com.pragma.api.dto.SolicitudeResponseDTO;
+import co.com.pragma.api.dto.solicitude.SolicitudeRequestDTO;
+import co.com.pragma.api.dto.solicitude.SolicitudeResponseDTO;
 import co.com.pragma.api.exception.handler.CustomAccessDeniedHandler;
 import co.com.pragma.api.exception.handler.GlobalExceptionHandler;
-import co.com.pragma.api.mapper.SolicitudeMapper;
+import co.com.pragma.api.mapper.solicitude.SolicitudeMapper;
+import co.com.pragma.api.solicitude.SolicitudeHandler;
+import co.com.pragma.api.solicitude.SolicitudeRouterRest;
 import co.com.pragma.model.jwt.JwtData;
 import co.com.pragma.model.jwt.gateways.JwtProviderPort;
 import co.com.pragma.model.logs.gateways.LoggerPort;
@@ -33,7 +35,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {
-        RouterRest.class, Handler.class,
+        SolicitudeRouterRest.class, SolicitudeHandler.class,
         GlobalExceptionHandler.class, WebSecurityConfig.class,
         CustomAccessDeniedHandler.class
 })

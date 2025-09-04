@@ -38,6 +38,5 @@ class UserAdapterTest {
     void setUp() {
         String baseUrl = String.format("http://localhost:%s", mockWebServer.getPort());
         WebClient webClient = WebClient.builder().baseUrl(baseUrl).build();
-        userAdapter = new UserAdapter(webClient, logger);
     }
 }
