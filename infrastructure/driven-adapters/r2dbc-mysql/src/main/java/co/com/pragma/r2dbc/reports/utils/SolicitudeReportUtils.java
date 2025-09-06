@@ -90,14 +90,15 @@ public class SolicitudeReportUtils {
     }
 
     public static String buildOrderBy(SolicitudeReportFilter filter) {
-        if (filter.getSortBy() != null && !filter.getSortBy().isBlank()) {
-            String sortField = switch (filter.getSortBy()) {
-                case "value" -> "s.monto";
+        if (filter.getPageable().getSortBy() != null && !filter.getPageable().getSortBy().isBlank()) {
+            String sortField = switch (filter.getPageable().getSortBy()) {
+                case "monto" -> "s.monto";
                 case "email" -> "s.email";
-                case "state" -> "e.nombre";
+                case "estado" -> "e.nomebre";
+                case "tipo_prestamo" -> "tp.nombre";
                 default -> "s.id_solicitud";
             };
-            String direction = !"ASC".equalsIgnoreCase(filter.getSortDirection()) ? "DESC" : "ASC";
+            String direction = !"ASC".equalsIgnoreCase(filter.getPageable().getSortDirection()) ? "DESC" : "ASC";
             return " ORDER BY " + sortField + " " + direction;
         }
         return " ORDER BY s.id_solicitud DESC";

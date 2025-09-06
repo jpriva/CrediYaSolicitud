@@ -1,15 +1,15 @@
 package co.com.pragma.usecase.solicitude;
 
 import co.com.pragma.model.constants.DefaultValues;
+import co.com.pragma.model.exceptions.InvalidFieldException;
+import co.com.pragma.model.exceptions.ValueOutOfBoundsException;
 import co.com.pragma.model.jwt.JwtData;
 import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.exceptions.LoanTypeNotFoundException;
 import co.com.pragma.model.loantype.gateways.LoanTypeRepository;
 import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.model.solicitude.Solicitude;
-import co.com.pragma.model.exceptions.InvalidFieldException;
 import co.com.pragma.model.solicitude.exceptions.SolicitudeNullException;
-import co.com.pragma.model.exceptions.ValueOutOfBoundsException;
 import co.com.pragma.model.solicitude.gateways.SolicitudeRepository;
 import co.com.pragma.model.state.State;
 import co.com.pragma.model.state.exceptions.StateNotFoundException;

@@ -23,7 +23,6 @@ public class SolicitudeEntityRepositoryImpl implements SolicitudeEntityRepositor
 
     @Override
     public Flux<SolicitudeReport> findSolicitudeReport(SolicitudeReportFilter filter) {
-
         String baseQuery = SolicitudeReportUtils.baseQuery(SolicitudeReportUtils.queryFields());
 
         Map<String, Object> params = new HashMap<>();
@@ -36,8 +35,8 @@ public class SolicitudeEntityRepositoryImpl implements SolicitudeEntityRepositor
                 SolicitudeReportUtils.buildOrderBy(filter) +
                 " LIMIT :limit OFFSET :offset";
 
-        params.put("limit", filter.getSize());
-        params.put("offset", filter.getPage() * filter.getSize());
+        params.put("limit", filter.getPageable().getSize());
+        params.put("offset", filter.getPageable().getPage() * filter.getPageable().getSize());
 
         logger.debug("Report Query: {}", finalQuery);
         logger.debug("Query Params: {}", params.toString());

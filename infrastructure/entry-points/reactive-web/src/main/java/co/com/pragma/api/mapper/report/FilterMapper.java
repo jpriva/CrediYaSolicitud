@@ -1,6 +1,7 @@
 package co.com.pragma.api.mapper.report;
 
 import co.com.pragma.api.constants.ApiConstants.FilterParams;
+import co.com.pragma.model.page.PageableData;
 import co.com.pragma.model.solicitude.reports.SolicitudeReportFilter;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -26,11 +27,15 @@ public class FilterMapper {
         getBigDecimalParam(params, FilterParams.MIN_BASE_SALARY).ifPresent(builder::minBaseSalary);
         getBigDecimalParam(params, FilterParams.MAX_BASE_SALARY).ifPresent(builder::maxBaseSalary);
 
-        builder.page(getIntParam(params, FilterParams.PAGE).orElse(FilterParams.DEFAULT_PAGE));
-        builder.size(getIntParam(params, FilterParams.SIZE).orElse(FilterParams.DEFAULT_SIZE));
+        PageableData.PageableDataBuilder pageableBuilder = PageableData.builder();
 
-        getParam(params, FilterParams.SORT_BY).ifPresent(builder::sortBy);
-        getParam(params, FilterParams.SORT_DIRECTION).ifPresent(builder::sortDirection);
+        pageableBuilder.page(getIntParam(params, FilterParams.PAGE).orElse(FilterParams.DEFAULT_PAGE));
+        pageableBuilder.size(getIntParam(params, FilterParams.SIZE).orElse(FilterParams.DEFAULT_SIZE));
+
+        getParam(params, FilterParams.SORT_BY).ifPresent(pageableBuilder::sortBy);
+        getParam(params, FilterParams.SORT_DIRECTION).ifPresent(pageableBuilder::sortDirection);
+
+        builder.pageable(pageableBuilder.build());
 
         return builder
                 .build();

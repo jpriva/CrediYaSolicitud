@@ -58,25 +58,7 @@ public class ApiConstants {
         public static final String REPORT_REQ_MAX_VALUE_DESC = "Maximum application value for the filter.";
         public static final String REPORT_REQ_MIN_SALARY_DESC = "Minimum client base salary for the filter.";
         public static final String REPORT_REQ_MAX_SALARY_DESC = "Maximum client base salary for the filter.";
-
-        // --- Pagination and Sorting ---
-        public static final String REPORT_REQ_PAGE_DESC = "Page number to request (starts at 0).";
-        public static final String REPORT_REQ_SIZE_DESC = "Number of records per page.";
-        public static final String REPORT_REQ_SORT_BY_DESC = "Field to sort the results by.";
-        public static final String REPORT_REQ_SORT_DIR_DESC = "Sort direction.";
-
-        // --- Sort By Values (for allowableValues) ---
-        public static final String SORT_BY_VALUE = "value";
-        public static final String SORT_BY_CLIENT_NAME = "clientName";
-        public static final String SORT_BY_STATE = "state";
-
-        // --- Sort Direction Values (for allowableValues) ---
-        public static final String SORT_DIR_ASC = "ASC";
-        public static final String SORT_DIR_DESC = "DESC";
-
         // --- Examples ---
-        public static final String EXAMPLE_SORT_BY_VALUE = "value";
-        public static final String EXAMPLE_SORT_DIR_DESC = "DESC";
         public static final String EXAMPLE_CLIENT_EMAIL = "john.doe@example.com";
         public static final String EXAMPLE_CLIENT_NAME = "John";
         public static final String EXAMPLE_CLIENT_ID = "123456789";
@@ -86,10 +68,6 @@ public class ApiConstants {
         public static final String EXAMPLE_MAX_VALUE = "50000.00";
         public static final String EXAMPLE_MIN_SALARY = "2000000.00";
         public static final String EXAMPLE_MAX_SALARY = "5000000.00";
-
-        // --- Defaults ---
-        public static final String DEFAULT_PAGE = "0";
-        public static final String DEFAULT_SIZE = "10";
 
         // --- Report Response Schema ---
         public static final String REPORT_RES_SCHEMA_NAME = "Loan Application Report Response";
@@ -121,6 +99,70 @@ public class ApiConstants {
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class Pageable {
+        //Schema
+        public static final String SCHEMA_NAME = "PageableRequest";
+        public static final String SCHEMA_DESC = "DTO for pagination and sorting parameters.";
+
+        // --- Examples ---
+        public static final String EXAMPLE_SORT_BY_VALUE = "monto";
+        public static final String EXAMPLE_SORT_DIR_DESC = "DESC";
+
+        // --- Pagination and Sorting ---
+        public static final String PAGEABLE_PAGE_DESC = "Page number to request (starts at 0).";
+        public static final String PAGEABLE_SIZE_DESC = "Number of records per page.";
+        public static final String PAGEABLE_SORT_BY_DESC = "Field to sort the results by.";
+        public static final String PAGEABLE_SORT_DIR_DESC = "Sort direction.";
+
+        // --- Sort By Values (for allowableValues) ---
+        public static final String SORT_BY_VALUE = "monto";
+        public static final String SORT_BY_CLIENT_EMAIL = "email";
+        public static final String SORT_BY_STATE = "estado";
+        public static final String SORT_BY_LOAN_TYPE = "tipo_prestamo";
+
+        // --- Sort Direction Values (for allowableValues) ---
+        public static final String SORT_DIR_ASC = "ASC";
+        public static final String SORT_DIR_DESC = "DESC";
+
+        // --- Defaults ---
+        public static final String DEFAULT_PAGE = "0";
+        public static final String DEFAULT_SIZE = "10";
+        public static final String REPORT_REQ_PAGEABLE_DESC = "Pagination and sorting parameters.";
+    }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class ReportDocs {
+        // --- Operation Summaries & Descriptions ---
+        public static final String REPORT_OP_SUMMARY = "Get a paginated report of loan applications";
+        public static final String REPORT_OP_DESC = "Retrieves a list of loan applications based on the provided filter, sort, and pagination criteria.";
+
+        // --- Parameter Descriptions ---
+        public static final String PARAM_CLIENT_EMAIL_DESC = "Filter by client's email (supports partial match).";
+        public static final String PARAM_CLIENT_NAME_DESC = "Filter by client's name (supports partial match).";
+        public static final String PARAM_CLIENT_ID_DESC = "Filter by client's identification number (supports partial match).";
+        public static final String PARAM_LOAN_TYPE_DESC = "Filter by the name of the loan type (supports partial match).";
+        public static final String PARAM_STATE_DESC = "Filter by the application state (doesn't supports partial match) (e.g., APROBADO, PENDIENTE, RECHAZADO).";
+        public static final String PARAM_MIN_VALUE_DESC = "Filter by minimum loan value.";
+        public static final String PARAM_MAX_VALUE_DESC = "Filter by maximum loan value.";
+        public static final String PARAM_MIN_SALARY_DESC = "Filter by minimum client base salary.";
+        public static final String PARAM_MAX_SALARY_DESC = "Filter by maximum client base salary.";
+        public static final String PARAM_PAGE_DESC = "Page number to retrieve (0-indexed).";
+        public static final String PARAM_SIZE_DESC = "Number of records per page.";
+        public static final String PARAM_SORT_BY_DESC = "Field to sort by.";
+        public static final String PARAM_SORT_DIR_DESC = "Sort direction.";
+
+        // --- Response Types ---
+        public static final String RES_TYPE_STRING = "string";
+        public static final String RES_TYPE_NUMBER = "number";
+        public static final String RES_TYPE_INTEGER = "integer";
+
+        // --- Response Descriptions ---
+        public static final String RES_200_DESC = "Report generated successfully.";
+        public static final String RES_401_DESC = "Unauthorized. A valid token is required.";
+        public static final String RES_500_DESC = "Internal server error.";
+    }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static final class FilterParams {
         public static final String CLIENT_EMAIL = "clientEmail";
         public static final String CLIENT_NAME = "clientName";
@@ -137,5 +179,16 @@ public class ApiConstants {
         public static final int DEFAULT_SIZE = 10;
         public static final String SORT_BY = "sortBy";
         public static final String SORT_DIRECTION = "sortDirection";
+    }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class ApiConfig {
+        public static final String DESCRIPTION_BEARER_AUTH = "Enter the JWT token obtained from the login endpoint.";
+        public static final String NAME_BEARER_AUTH = "bearerAuth";
+        public static final String SCHEME_BEARER = "bearer";
+        public static final String BEARER_FORMAT_JWT = "JWT";
+        public static final String TITLE_API = "Crediya Auth API Microservice";
+        public static final String VERSION_API = "1.0.0";
+        public static final String DESCRIPTION_API = "This is the API for Crediya Auth Microservice";
     }
 }

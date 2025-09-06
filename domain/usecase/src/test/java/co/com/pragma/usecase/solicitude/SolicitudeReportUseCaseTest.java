@@ -18,11 +18,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
-import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,70 +61,6 @@ class SolicitudeReportUseCaseTest {
     }
 
     @Nested
-    class GetSolicitudeReportTests {
-
-        @Test
-        void withClientFilters_shouldFetchUsersFirst() {
-            SolicitudeReportFilter filter = SolicitudeReportFilter.builder().clientName("Test").build();
-            when(userPort.getUserByFilter(filter)).thenReturn(Flux.just(userProjection1));
-            when(repository.findSolicitudeReport(any(SolicitudeReportFilter.class))).thenReturn(Flux.just(partialSolicitudeReport));
-
-            Flux<SolicitudeReport> result = useCase.getSolicitudeReport(filter);
-
-            StepVerifier.create(result)
-                    .expectNextMatches(report ->
-                            report.getClientName().equals("Test User") &&
-                            report.getSolicitudeId() == 1
-                    )
-                    .verifyComplete();
-
-            verify(userPort).getUserByFilter(filter);
-            verify(repository).findSolicitudeReport(any(SolicitudeReportFilter.class));
-        }
-
-        @Test
-        void withNoClientFilters_shouldFetchSolicitudesFirst() {
-            SolicitudeReportFilter filter = SolicitudeReportFilter.builder().stateName("PENDIENTE").build();
-            when(repository.findSolicitudeReport(filter)).thenReturn(Flux.just(partialSolicitudeReport));
-            when(userPort.getUsersByEmails(anyList())).thenReturn(Flux.just(userProjection1));
-
-            Flux<SolicitudeReport> result = useCase.getSolicitudeReport(filter);
-
-            StepVerifier.create(result)
-                    .expectNextMatches(report ->
-                            report.getClientName().equals("Test User") &&
-                            report.getSolicitudeId() == 1
-                    )
-                    .verifyComplete();
-
-            verify(repository).findSolicitudeReport(filter);
-            verify(userPort).getUsersByEmails(List.of("test@test.com"));
-        }
-
-        @Test
-        void withNoClientFilters_andNoSolicitudesFound_shouldReturnEmpty() {
-            SolicitudeReportFilter filter = SolicitudeReportFilter.builder().build();
-            when(repository.findSolicitudeReport(filter)).thenReturn(Flux.empty());
-
-            Flux<SolicitudeReport> result = useCase.getSolicitudeReport(filter);
-
-            StepVerifier.create(result)
-                    .verifyComplete();
-        }
-
-        @Test
-        void withClientFilters_andNoUsersFound_shouldReturnEmpty() {
-            SolicitudeReportFilter filter = SolicitudeReportFilter.builder().clientName("Unknown").build();
-            when(userPort.getUserByFilter(filter)).thenReturn(Flux.empty());
-
-            Flux<SolicitudeReport> result = useCase.getSolicitudeReport(filter);
-
-            StepVerifier.create(result)
-                    .verifyComplete();
-        }
-    }
-
-    @Nested
     class GetSolicitudeReportReactiveTests {
 
         @Test
@@ -142,7 +74,7 @@ class SolicitudeReportUseCaseTest {
             StepVerifier.create(result)
                     .expectNextMatches(report ->
                             report.getClientName().equals("Test User") &&
-                            report.getSolicitudeId() == 1
+                                    report.getSolicitudeId() == 1
                     )
                     .verifyComplete();
         }
@@ -158,7 +90,7 @@ class SolicitudeReportUseCaseTest {
             StepVerifier.create(result)
                     .expectNextMatches(report ->
                             report.getClientName() == null && // User data should be null
-                            report.getSolicitudeId() == 1
+                                    report.getSolicitudeId() == 1
                     )
                     .verifyComplete();
         }

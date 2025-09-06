@@ -1,5 +1,6 @@
 package co.com.pragma.usecase.solicitude.utils;
 
+import co.com.pragma.model.page.PaginatedData;
 import co.com.pragma.model.solicitude.reports.SolicitudeReport;
 import co.com.pragma.model.solicitude.reports.SolicitudeReportFilter;
 import co.com.pragma.model.user.UserProjection;
@@ -68,5 +69,24 @@ public class ReportUtils {
                 (filter.getClientIdNumber() != null && !filter.getClientIdNumber().isBlank()) ||
                 (filter.getMinBaseSalary() != null) ||
                 (filter.getMaxBaseSalary() != null);
+    }
+
+    public static PaginatedData<SolicitudeReport> buildPaginated(
+            SolicitudeReportFilter filter,
+            List<SolicitudeReport> page,
+            Long totalElements
+    ) {
+        int currentPage = filter.getPageable().getPage();
+        int pageSize = filter.getPageable().getSize();
+        int totalPages = (pageSize > 0) ? (int) (totalElements / pageSize) : 0;
+        return PaginatedData.<SolicitudeReport>builder()
+                .content(page==null?List.of():page)
+                .currentPage(currentPage)
+                .pageSize(pageSize)
+                .totalElements(totalElements)
+                .totalPages(totalPages)
+                .hasNext(currentPage<totalPages-1)
+                .hasPrevious(currentPage>0)
+                .build();
     }
 }

@@ -1,5 +1,6 @@
 package co.com.pragma.model.solicitude.reports;
 
+import co.com.pragma.model.page.PageableData;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -23,9 +24,6 @@ public class SolicitudeReportFilter {
     private BigDecimal maxBaseSalary;
     private List<String> emailsIn;
 
-    private int page;
-    private int size;
-    private String sortBy;
-    private String sortDirection;
+    private PageableData pageable;
 
 }

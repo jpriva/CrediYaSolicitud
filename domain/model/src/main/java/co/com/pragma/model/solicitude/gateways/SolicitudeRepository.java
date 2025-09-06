@@ -11,5 +11,7 @@ public interface SolicitudeRepository {
 
     Flux<SolicitudeReport> findSolicitudeReport(SolicitudeReportFilter filter);
 
+    Mono<Long> countSolicitudeReport(SolicitudeReportFilter filter);
+
     Mono<Solicitude> findById(Integer solicitudeId);
 }

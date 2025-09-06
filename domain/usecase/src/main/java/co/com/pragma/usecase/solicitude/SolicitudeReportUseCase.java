@@ -1,6 +1,7 @@
 package co.com.pragma.usecase.solicitude;
 
 import co.com.pragma.model.logs.gateways.LoggerPort;
+import co.com.pragma.model.page.PaginatedData;
 import co.com.pragma.model.solicitude.gateways.SolicitudeRepository;
 import co.com.pragma.model.solicitude.reports.SolicitudeReport;
 import co.com.pragma.model.solicitude.reports.SolicitudeReportFilter;
@@ -10,6 +11,8 @@ import co.com.pragma.usecase.solicitude.utils.ReportUtils;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 public class SolicitudeReportUseCase {
@@ -30,31 +33,32 @@ public class SolicitudeReportUseCase {
                 .doOnNext(report -> logger.debug("Solicitude Report: {}", report));
     }
 
-    public Flux<SolicitudeReport> getSolicitudeReport(SolicitudeReportFilter filter) {
+    public Mono<PaginatedData<SolicitudeReport>> getSolicitudeReport(SolicitudeReportFilter filter) {
         return Mono.just(filter)
-                .flatMapMany(solicitudeFilter ->
+                .flatMap(solicitudeFilter ->
                         ReportUtils.hasClientFilters(solicitudeFilter)
                                 ? getUsersFirst(solicitudeFilter)
                                 : getSolicitudesFirst(solicitudeFilter)
                 );
     }
 
-    private Flux<SolicitudeReport> getUsersFirst(SolicitudeReportFilter filter) {
+    private Mono<PaginatedData<SolicitudeReport>> getUsersFirst(SolicitudeReportFilter filter) {
         logger.info("Client filters detected. Fetching users first.");
         return userPort.getUserByFilter(filter)
                 .collectMap(UserProjection::getEmail)
                 .filter(map -> !map.isEmpty())
-                .flatMapMany(usersMap ->
-                        repository.findSolicitudeReport(
-                                        filter.toBuilder().emailsIn(usersMap.keySet().stream().toList()
-                                        ).build())
-                                .map(report ->
-                                        ReportUtils.buildReport(report, usersMap.get(report.getClientEmail()))
-                                )
-                );
+                .flatMapMany(usersMap -> {
+                    filter.setEmailsIn(usersMap.keySet().stream().toList());
+                    return repository.findSolicitudeReport(filter)
+                            .map(report ->
+                                    ReportUtils.buildReport(report, usersMap.get(report.getClientEmail()))
+                            );
+                })
+                .collectList()
+                .flatMap(list -> getPaginatedReport(filter, list));
     }
 
-    private Flux<SolicitudeReport> getSolicitudesFirst(SolicitudeReportFilter filter) {
+    private Mono<PaginatedData<SolicitudeReport>> getSolicitudesFirst(SolicitudeReportFilter filter) {
         logger.info("No client filters detected. Fetching solicitudes first.");
         return repository.findSolicitudeReport(filter)
                 .collectList()
@@ -62,7 +66,19 @@ public class SolicitudeReportUseCase {
                 .flatMapMany(solicitudes ->
                         ReportUtils.getUserData(userPort, solicitudes)
                 )
+                .collectList()
+                .flatMap(list -> getPaginatedReport(filter, list))
                 .doOnError(ex -> logger.error("Error getting solicitude report", ex))
-                .doOnNext(report -> logger.debug("Solicitude Report: {}", report));
+                .doOnNext(report -> logger.debug("Solicitude Report Page: {}", report));
+    }
+
+    private Mono<PaginatedData<SolicitudeReport>> getPaginatedReport(
+            SolicitudeReportFilter filter,
+            List<SolicitudeReport> list
+    ) {
+        return repository.countSolicitudeReport(filter)
+                .map(size ->
+                        ReportUtils.buildPaginated(filter, list, size)
+                );
     }
 }

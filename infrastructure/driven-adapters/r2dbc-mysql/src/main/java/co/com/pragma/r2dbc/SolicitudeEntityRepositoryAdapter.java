@@ -31,6 +31,11 @@ public class SolicitudeEntityRepositoryAdapter implements SolicitudeRepository {
     }
 
     @Override
+    public Mono<Long> countSolicitudeReport(SolicitudeReportFilter filter) {
+        return solicitudeRepository.countSolicitudeReport(filter);
+    }
+
+    @Override
     public Mono<Solicitude> findById(Integer solicitudeId) {
         return solicitudeRepository.findById(solicitudeId).map(solicitudeMapper::toDomain);
     }

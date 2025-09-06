@@ -7,6 +7,7 @@ import co.com.pragma.api.dto.solicitude.SolicitudeRequestDTO;
 import co.com.pragma.api.dto.solicitude.SolicitudeResponseDTO;
 import co.com.pragma.api.exception.handler.CustomAccessDeniedHandler;
 import co.com.pragma.api.exception.handler.GlobalExceptionHandler;
+import co.com.pragma.api.mapper.page.PageMapper;
 import co.com.pragma.api.mapper.report.SolicitudeReportMapper;
 import co.com.pragma.api.mapper.solicitude.SolicitudeMapper;
 import co.com.pragma.api.solicitude.SolicitudeHandler;
@@ -64,6 +65,9 @@ class RouterRestTest {
 
     @MockitoBean
     private SolicitudeReportMapper solicitudeReportMapper;
+
+    @MockitoBean
+    private PageMapper pageMapper;
 
     @Test
     @WithMockUser(authorities = "CLIENTE")
