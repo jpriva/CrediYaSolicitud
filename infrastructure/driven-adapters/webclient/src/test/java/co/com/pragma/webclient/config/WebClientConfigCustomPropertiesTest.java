@@ -1,9 +1,11 @@
 package co.com.pragma.webclient.config;
 
+import co.com.pragma.model.logs.gateways.LoggerPort;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,6 +22,9 @@ class WebClientConfigCustomPropertiesTest {
 
     @Autowired
     private WebClientProperties properties;
+
+    @MockitoBean
+    private LoggerPort logger;
 
     @Test
     void shouldCreateWebClientBeanWithCustomValues() {

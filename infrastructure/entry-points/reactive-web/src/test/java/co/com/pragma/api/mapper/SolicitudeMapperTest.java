@@ -1,7 +1,11 @@
 package co.com.pragma.api.mapper;
 
-import co.com.pragma.api.dto.SolicitudeRequestDTO;
-import co.com.pragma.api.dto.SolicitudeResponseDTO;
+import co.com.pragma.api.dto.solicitude.SolicitudeRequestDTO;
+import co.com.pragma.api.dto.solicitude.SolicitudeResponseDTO;
+import co.com.pragma.api.mapper.solicitude.LoanTypeMapperImpl;
+import co.com.pragma.api.mapper.solicitude.SolicitudeMapper;
+import co.com.pragma.api.mapper.solicitude.SolicitudeMapperImpl;
+import co.com.pragma.api.mapper.solicitude.StateMapperImpl;
 import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.solicitude.Solicitude;
 import co.com.pragma.model.state.State;

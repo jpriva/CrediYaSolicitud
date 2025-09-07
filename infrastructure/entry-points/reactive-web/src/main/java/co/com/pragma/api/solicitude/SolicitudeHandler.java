@@ -1,11 +1,16 @@
-package co.com.pragma.api;
+package co.com.pragma.api.solicitude;
 
-import co.com.pragma.api.dto.SolicitudeRequestDTO;
-import co.com.pragma.api.mapper.SolicitudeMapper;
+import co.com.pragma.api.dto.solicitude.SolicitudeRequestDTO;
+import co.com.pragma.api.mapper.page.PageMapper;
+import co.com.pragma.api.mapper.report.FilterMapper;
+import co.com.pragma.api.mapper.report.SolicitudeReportMapper;
+import co.com.pragma.api.mapper.solicitude.SolicitudeMapper;
 import co.com.pragma.model.exceptions.InvalidCredentialsException;
 import co.com.pragma.model.jwt.JwtData;
 import co.com.pragma.model.jwt.gateways.JwtProviderPort;
 import co.com.pragma.model.logs.gateways.LoggerPort;
+import co.com.pragma.model.solicitude.reports.SolicitudeReportFilter;
+import co.com.pragma.usecase.solicitude.SolicitudeReportUseCase;
 import co.com.pragma.usecase.solicitude.SolicitudeUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,10 +22,13 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
-public class Handler {
+public class SolicitudeHandler {
     private final SolicitudeUseCase solicitudeUseCase;
+    private final SolicitudeReportUseCase solicitudeReportUseCase;
     private final LoggerPort logger;
     private final SolicitudeMapper solicitudeMapper;
+    private final SolicitudeReportMapper solicitudeReportMapper;
+    private final PageMapper pageMapper;
     private final JwtProviderPort jwtProvider;
 
 
@@ -43,6 +51,18 @@ public class Handler {
                         ServerResponse.status(HttpStatus.CREATED)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .bodyValue(savedSolicitude)
+                );
+    }
+
+    public Mono<ServerResponse> listenGETSolicitudeReportUseCase(ServerRequest serverRequest) {
+        SolicitudeReportFilter filter = FilterMapper.toFilter(serverRequest.queryParams());
+        return Mono.just(filter)
+                .flatMap(solicitudeReportUseCase::getSolicitudeReport)
+                .map(pageMapper::toDto)
+                .flatMap(responsePage ->
+                        ServerResponse.ok()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(responsePage)
                 );
     }
 }

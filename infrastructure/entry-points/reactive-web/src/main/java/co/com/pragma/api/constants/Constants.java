@@ -79,6 +79,7 @@ public final class Constants {
     // --- API Paths ---
     public static final String API_BASE_PATH = "/api/v1";
     public static final String API_SOLICITUDE_PATH = API_BASE_PATH + "/solicitud";
+    public static final String API_REPORT_PATH = API_BASE_PATH + "/report";
 
     // --- API Operations ---
     public static final String GET_ALL_LOAN_TYPES_SUMMARY = "Get all loan types";
@@ -86,12 +87,16 @@ public final class Constants {
     public static final String SAVE_SOLICITUDE_SUMMARY = "Create a new loan application";
     public static final String SAVE_SOLICITUDE_DESCRIPTION = "Receives the data to create a new loan application and returns the created object.";
     public static final String OPERATION_SAVE_SOLICITUDE_ID = "saveLoanApplication";
+    public static final String OPERATION_REPORT_SOLICITUDE_ID = "getReportLoans";
     public static final String OPERATION_SAVE_SOLICITUDE_BODY_DESC = "Loan Application Requested Data";
+    public static final String OPERATION_REPORT_BODY_DESC = "Report filters and pagination Requested Data";
 
     // --- API Responses ---
+    public static final String RESPONSE_OK_CODE = "200";
     public static final String RESPONSE_CREATED_CODE = "201";
     public static final String RESPONSE_BAD_REQUEST_CODE = "400";
     public static final String RESPONSE_CONFLICT_CODE = "409";
+    public static final String RESPONSE_REPORT_OK_DESC = "Fetch Report Successfully";
     public static final String RESPONSE_SAVE_SOLICITUDE_CREATED_DESC = "Loan Application Created Successfully";
     public static final String RESPONSE_SAVE_SOLICITUDE_BAD_REQUEST_DESC = "Invalid request (e.g. missing or incorrectly formatted data)";
     public static final String RESPONSE_SAVE_SOLICITUDE_CONFLICT_DESC = "Data conflict (e.g. email already exists)";

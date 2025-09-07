@@ -1,5 +1,7 @@
 package co.com.pragma.usecase.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Supplier;
@@ -7,9 +9,8 @@ import java.util.function.Supplier;
 /**
  * A utility class for performing reactive validations.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ValidationUtils {
-
-    private ValidationUtils() {}
 
     /**
      * Validates a given condition reactively.

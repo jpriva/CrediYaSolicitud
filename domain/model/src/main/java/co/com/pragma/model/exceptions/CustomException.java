@@ -24,4 +24,10 @@ public class CustomException extends RuntimeException {
         this.webStatus = webStatus;
         this.timestamp = Instant.now();
     }
+    public CustomException(String message, String code, Throwable cause) {
+        super(message,cause);
+        this.code = code;
+        this.webStatus = HTTP_BAD_REQUEST;
+        this.timestamp = Instant.now();
+    }
 }

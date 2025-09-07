@@ -1,9 +1,11 @@
-package co.com.pragma.api;
+package co.com.pragma.api.solicitude.documentation;
 
+import co.com.pragma.api.solicitude.SolicitudeHandler;
+import co.com.pragma.api.constants.ApiConstants;
 import co.com.pragma.api.constants.Constants;
 import co.com.pragma.api.dto.ErrorDTO;
-import co.com.pragma.api.dto.SolicitudeRequestDTO;
-import co.com.pragma.api.dto.SolicitudeResponseDTO;
+import co.com.pragma.api.dto.solicitude.SolicitudeRequestDTO;
+import co.com.pragma.api.dto.solicitude.SolicitudeResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,17 +21,17 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static co.com.pragma.api.constants.Constants.API_SOLICITUDE_PATH;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 
 @Configuration
-public class RouterRest {
+public class SolicitudeDocumentation {
     @Bean
     @RouterOperations({
             @RouterOperation(
-                    path = API_SOLICITUDE_PATH,
+                    path = ApiConstants.ApiPath.SOLICITUDE_PATH,
                     produces = {MediaType.APPLICATION_JSON_VALUE},
                     method = RequestMethod.POST,
-                    beanClass = Handler.class,
+                    beanClass = SolicitudeHandler.class,
                     beanMethod = "listenPOSTSaveSolicitudeUseCase",
                     operation = @Operation(
                             operationId = Constants.OPERATION_SAVE_SOLICITUDE_ID,
@@ -60,9 +62,7 @@ public class RouterRest {
                     )
             )
     })
-    public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return RouterFunctions.route()
-                .POST(API_SOLICITUDE_PATH, handler::listenPOSTSaveSolicitudeUseCase)
-                .build();
+    public RouterFunction<ServerResponse> solicitudeDocumentationRoutes() {
+        return RouterFunctions.route(GET(ApiConstants.ApiPath.DUMMY_SOLICITUDE_DOC_ROUTE), req -> ServerResponse.ok().build());
     }
 }

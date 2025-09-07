@@ -36,11 +36,6 @@ CREATE TABLE solicitud (
         REFERENCES tipo_prestamo(id_tipo_prestamo)
 );
 
-INSERT INTO estados (nombre, descripcion) VALUES
-('PENDIENTE', 'La solicitud está pendiente de revisión.'),
-('APROBADO', 'La solicitud ha sido aprobada.'),
-('RECHAZADO', 'La solicitud ha sido rechazada.');
-
 INSERT INTO tipo_prestamo (nombre, monto_minimo, monto_maximo, tasa_interes, validacion_automatica) VALUES
 ('CREDI-HOGAR', 50000000.00, 800000000.00, 7.20, FALSE),
 ('CREDI-ESTUDIO', 2000000.00, 80000000.00, 4.95, TRUE),

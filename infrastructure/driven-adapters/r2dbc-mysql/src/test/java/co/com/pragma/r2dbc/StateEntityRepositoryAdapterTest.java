@@ -3,17 +3,24 @@ package co.com.pragma.r2dbc;
 import co.com.pragma.model.state.State;
 import co.com.pragma.r2dbc.entity.StateEntity;
 import co.com.pragma.r2dbc.mapper.PersistenceStateMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Example;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Collections;
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class StateEntityRepositoryAdapterTest {
@@ -27,61 +34,141 @@ class StateEntityRepositoryAdapterTest {
     @InjectMocks
     private StateEntityRepositoryAdapter adapter;
 
-    @Test
-    void shouldReturnStateWhenFound() {
-        State inputDomain = State.builder().name("PENDIENTE").build();
-        StateEntity entityToFind = new StateEntity();
-        entityToFind.setName("PENDIENTE");
+    private State domainState;
+    private StateEntity entityState;
 
-        StateEntity foundEntity = new StateEntity();
-        foundEntity.setStateId(1);
-        foundEntity.setName("PENDIENTE");
-
-        State expectedDomain = State.builder().stateId(1).name("PENDIENTE").build();
-
-        when(stateMapper.toEntity(inputDomain)).thenReturn(entityToFind);
-        when(stateRepository.findOne(any(Example.class))).thenReturn(Mono.just(foundEntity));
-        when(stateMapper.toDomain(foundEntity)).thenReturn(expectedDomain);
-
-        Mono<State> result = adapter.findOne(inputDomain);
-
-        StepVerifier.create(result)
-                .expectNext(expectedDomain)
-                .verifyComplete();
-
-        verify(stateRepository).findOne(any(Example.class));
-        verify(stateMapper).toDomain(foundEntity);
+    @BeforeEach
+    void setUp() {
+        domainState = State.builder().stateId(1).name("PENDING").description("Pending state").build();
+        entityState = new StateEntity();
+        entityState.setStateId(1);
+        entityState.setName("PENDING");
+        entityState.setDescription("Pending state");
     }
 
-    @Test
-    void shouldReturnEmptyWhenNotFound() {
-        State inputDomain = State.builder().name("NO_EXISTE").build();
-        StateEntity entityToFind = new StateEntity();
-        entityToFind.setName("NO_EXISTE");
+    @Nested
+    class FindOneTests {
+        @Test
+        void shouldReturnDomainObjectWhenFound() {
+            when(stateMapper.toEntity(any(State.class))).thenReturn(entityState);
+            when(stateRepository.findOne(any(Example.class))).thenReturn(Mono.just(entityState));
+            when(stateMapper.toDomain(any(StateEntity.class))).thenReturn(domainState);
 
-        when(stateMapper.toEntity(inputDomain)).thenReturn(entityToFind);
-        when(stateRepository.findOne(any(Example.class))).thenReturn(Mono.empty());
+            Mono<State> result = adapter.findOne(domainState);
 
-        Mono<State> result = adapter.findOne(inputDomain);
+            StepVerifier.create(result)
+                    .expectNext(domainState)
+                    .verifyComplete();
 
-        StepVerifier.create(result)
-                .verifyComplete();
+            verify(stateMapper).toEntity(domainState);
+            verify(stateRepository).findOne(any(Example.class));
+            verify(stateMapper).toDomain(entityState);
+        }
 
-        verify(stateMapper, never()).toDomain(any());
+        @Test
+        void shouldReturnEmptyWhenNotFound() {
+            when(stateMapper.toEntity(any(State.class))).thenReturn(entityState);
+            when(stateRepository.findOne(any(Example.class))).thenReturn(Mono.empty());
+
+            Mono<State> result = adapter.findOne(domainState);
+
+            StepVerifier.create(result)
+                    .verifyComplete();
+        }
     }
 
-    @Test
-    void shouldReturnErrorWhenRepositoryFails() {
-        State inputDomain = State.builder().name("ERROR").build();
-        RuntimeException dbException = new RuntimeException("Database error");
+    @Nested
+    class FindAllTests {
+        @Test
+        void shouldReturnAllStatesFromRepository() {
+            when(stateRepository.findAll()).thenReturn(Flux.just(entityState));
+            when(stateMapper.toDomain(any(StateEntity.class))).thenReturn(domainState);
 
-        when(stateMapper.toEntity(inputDomain)).thenReturn(new StateEntity());
-        when(stateRepository.findOne(any(Example.class))).thenReturn(Mono.error(dbException));
+            Flux<State> result = adapter.findAll();
 
-        Mono<State> result = adapter.findOne(inputDomain);
+            StepVerifier.create(result)
+                    .expectNext(domainState)
+                    .verifyComplete();
+        }
 
-        StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && "Database error".equals(throwable.getMessage()))
-                .verify();
+        @Test
+        void shouldReturnEmptyWhenRepositoryIsEmpty() {
+            when(stateRepository.findAll()).thenReturn(Flux.empty());
+
+            Flux<State> result = adapter.findAll();
+
+            StepVerifier.create(result)
+                    .verifyComplete();
+        }
+    }
+
+    @Nested
+    class SaveAllTests {
+        @Test
+        void shouldSaveAndReturnMappedDomainObjects() {
+            List<State> domainStates = List.of(domainState);
+            List<StateEntity> entityStates = List.of(entityState);
+
+            when(stateMapper.toEntity(domainState)).thenReturn(entityState);
+            when(stateRepository.saveAll(any(List.class))).thenReturn(Flux.fromIterable(entityStates));
+            when(stateMapper.toDomain(entityState)).thenReturn(domainState);
+
+            Flux<State> result = adapter.saveAll(domainStates);
+
+            StepVerifier.create(result)
+                    .expectNext(domainState)
+                    .verifyComplete();
+        }
+
+        @Test
+        void shouldHandleEmptyList() {
+            List<State> emptyList = Collections.emptyList();
+            when(stateRepository.saveAll(any(List.class))).thenReturn(Flux.empty());
+
+            Flux<State> result = adapter.saveAll(emptyList);
+
+            StepVerifier.create(result)
+                    .verifyComplete();
+        }
+    }
+
+    @Nested
+    class FindByNameTests {
+        @Test
+        void shouldReturnDomainObjectWhenFound() {
+            String name = "PENDING";
+            when(stateRepository.findByName(name)).thenReturn(Mono.just(entityState));
+            when(stateMapper.toDomain(entityState)).thenReturn(domainState);
+
+            Mono<State> result = adapter.findByName(name);
+
+            StepVerifier.create(result)
+                    .expectNext(domainState)
+                    .verifyComplete();
+        }
+
+        @Test
+        void shouldReturnEmptyWhenNotFound() {
+            String name = "UNKNOWN";
+            when(stateRepository.findByName(name)).thenReturn(Mono.empty());
+
+            Mono<State> result = adapter.findByName(name);
+
+            StepVerifier.create(result)
+                    .verifyComplete();
+        }
+
+        @Test
+        void shouldPropagateErrorWhenRepositoryFails() {
+            String name = "PENDING";
+            RuntimeException exception = new RuntimeException("DB Error");
+            when(stateRepository.findByName(name)).thenReturn(Mono.error(exception));
+
+            Mono<State> result = adapter.findByName(name);
+
+            StepVerifier.create(result)
+                    .expectErrorMatches(throwable -> throwable instanceof RuntimeException && "DB Error".equals(throwable.getMessage()))
+                    .verify();
+        }
     }
 }

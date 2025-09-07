@@ -51,7 +51,7 @@ class WebSecurityConfigTest {
     @Test
     void protectedEndpoint_shouldReturnUnauthorized_whenNoTokenIsProvided() {
         webTestClient.post()
-                .uri(ApiConstants.ApiPaths.SOLICITUDE_PATH)
+                .uri(ApiConstants.ApiPath.SOLICITUDE_PATH)
                 .exchange()
                 .expectStatus().isUnauthorized();
     }
@@ -62,7 +62,7 @@ class WebSecurityConfigTest {
         when(jwtProvider.getClaims(invalidToken)).thenThrow(new SignatureException("Invalid signature"));
 
         webTestClient.post()
-                .uri(ApiConstants.ApiPaths.SOLICITUDE_PATH)
+                .uri(ApiConstants.ApiPath.SOLICITUDE_PATH)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + invalidToken)
                 .exchange()
                 .expectStatus().isUnauthorized();
@@ -75,7 +75,7 @@ class WebSecurityConfigTest {
         when(jwtProvider.getClaims(token)).thenReturn(jwtData);
 
         webTestClient.post()
-                .uri(ApiConstants.ApiPaths.SOLICITUDE_PATH)
+                .uri(ApiConstants.ApiPath.SOLICITUDE_PATH)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .exchange()
                 .expectStatus().isForbidden();
@@ -88,7 +88,7 @@ class WebSecurityConfigTest {
         when(jwtProvider.getClaims(token)).thenReturn(jwtData);
 
         webTestClient.post()
-                .uri(ApiConstants.ApiPaths.SOLICITUDE_PATH)
+                .uri(ApiConstants.ApiPath.SOLICITUDE_PATH)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .exchange()
                 .expectStatus().isNotFound(); // 404 is correct, it means security passed but no handler was found
@@ -100,7 +100,7 @@ class WebSecurityConfigTest {
         when(jwtProvider.getClaims(expiredToken)).thenThrow(new ExpiredJwtException(null, null, "Expired"));
 
         webTestClient.post()
-                .uri(ApiConstants.ApiPaths.SOLICITUDE_PATH)
+                .uri(ApiConstants.ApiPath.SOLICITUDE_PATH)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + expiredToken)
                 .exchange()
                 .expectStatus().isUnauthorized();
