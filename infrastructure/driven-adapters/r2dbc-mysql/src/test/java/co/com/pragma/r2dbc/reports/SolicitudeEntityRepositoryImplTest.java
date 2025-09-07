@@ -1,8 +1,10 @@
 package co.com.pragma.r2dbc.reports;
 
 import co.com.pragma.model.logs.gateways.LoggerPort;
+import co.com.pragma.model.page.PageableData;
 import co.com.pragma.model.solicitude.reports.SolicitudeReport;
 import co.com.pragma.model.solicitude.reports.SolicitudeReportFilter;
+import io.r2dbc.spi.Readable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,8 +21,6 @@ import reactor.test.StepVerifier;
 import java.math.BigDecimal;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-
-import io.r2dbc.spi.Readable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -55,11 +55,14 @@ class SolicitudeEntityRepositoryImplTest {
 
     @Test
     void findSolicitudeReport_shouldReturnMappedFluxAndBindLimitOffset() {
-        SolicitudeReportFilter filter = SolicitudeReportFilter.builder()
+        PageableData pageable = PageableData.builder()
                 .page(1)
                 .size(20)
-                .sortBy("value")
+                .sortBy("monto")
                 .sortDirection("ASC")
+                .build();
+        SolicitudeReportFilter filter = SolicitudeReportFilter.builder()
+                .pageable(pageable)
                 .build();
 
         SolicitudeReport r1 = SolicitudeReport.builder()
@@ -87,17 +90,20 @@ class SolicitudeEntityRepositoryImplTest {
         String usedSql = sqlCaptor.getValue();
         assertThat(usedSql).contains("SELECT").contains("FROM solicitud s").contains("LIMIT :limit OFFSET :offset");
 
-        verify(executeSpec, atLeastOnce()).bind(eq("limit"), eq(20));
-        verify(executeSpec, atLeastOnce()).bind(eq("offset"), eq(20));
+        verify(executeSpec, atLeastOnce()).bind("limit", 20);
+        verify(executeSpec, atLeastOnce()).bind("offset", 20L);
 
         verify(logger, times(2)).debug(anyString(), any());
     }
 
     @Test
     void countSolicitudeReport_shouldReturnCount() {
-        SolicitudeReportFilter filter = SolicitudeReportFilter.builder()
+        PageableData pageable = PageableData.builder()
                 .page(0)
                 .size(10)
+                .build();
+        SolicitudeReportFilter filter = SolicitudeReportFilter.builder()
+                .pageable(pageable)
                 .build();
 
         when(executeSpec.map((Function<Readable, Long>) any())).thenReturn(rowsFetchSpecCount);
@@ -119,7 +125,7 @@ class SolicitudeEntityRepositoryImplTest {
         when(rowsFetchSpecCount.one()).thenReturn(Mono.empty());
 
         StepVerifier.create(repository.countSolicitudeReport(filter))
-            .expectNext(0L)
-            .verifyComplete();
+                .expectNext(0L)
+                .verifyComplete();
     }
 }

@@ -1,5 +1,7 @@
 package co.com.pragma.usecase.solicitude.utils;
 
+import co.com.pragma.model.page.PageableData;
+import co.com.pragma.model.page.PaginatedData;
 import co.com.pragma.model.solicitude.reports.SolicitudeReport;
 import co.com.pragma.model.solicitude.reports.SolicitudeReportFilter;
 import co.com.pragma.model.user.UserProjection;
@@ -121,8 +123,11 @@ class ReportUtilsTest {
         static Stream<Arguments> filterProvider() {
             return Stream.of(
                     Arguments.of(SolicitudeReportFilter.builder().clientEmail("test").build(), true),
+                    Arguments.of(SolicitudeReportFilter.builder().clientEmail("").build(), false),
                     Arguments.of(SolicitudeReportFilter.builder().clientName("test").build(), true),
+                    Arguments.of(SolicitudeReportFilter.builder().clientName("").build(), false),
                     Arguments.of(SolicitudeReportFilter.builder().clientIdNumber("123").build(), true),
+                    Arguments.of(SolicitudeReportFilter.builder().clientIdNumber("").build(), false),
                     Arguments.of(SolicitudeReportFilter.builder().minBaseSalary(BigDecimal.ONE).build(), true),
                     Arguments.of(SolicitudeReportFilter.builder().maxBaseSalary(BigDecimal.TEN).build(), true),
                     Arguments.of(SolicitudeReportFilter.builder().stateName("PENDIENTE").build(), false),
@@ -138,6 +143,67 @@ class ReportUtilsTest {
             boolean result = ReportUtils.hasClientFilters(filter);
 
             assertThat(result).isEqualTo(expectedResult);
+        }
+    }
+
+    @Nested
+    class buildPaginated{
+        @Test
+        void buildPaginated_shouldCreatePaginatedDataSolicitudeReportWithData_whenListHasSize(){
+            SolicitudeReport report = SolicitudeReport.builder()
+                    .solicitudeId(1)
+                    .build();
+            List<SolicitudeReport> page = List.of(report);
+            PageableData pageable = PageableData.builder()
+                    .page(0)
+                    .size(10)
+                    .build();
+            SolicitudeReportFilter filter = SolicitudeReportFilter.builder()
+                    .pageable(pageable)
+                    .build();
+            Long totalElements = 1L;
+
+            PaginatedData<SolicitudeReport> paged = ReportUtils.buildPaginated(filter,page,totalElements);
+
+            assertThat(paged).isNotNull();
+            assertThat(paged.getContent()).isNotNull();
+            assertThat(paged.getContent()).hasSize(1);
+            assertThat(paged.getCurrentPage()).isZero();
+            assertThat(paged.getPageSize()).isEqualTo(10);
+            assertThat(paged.getTotalElements()).isEqualTo(totalElements);
+            assertThat(paged.getTotalPages()).isZero();
+            assertThat(paged.isHasNext()).isFalse();
+            assertThat(paged.isHasPrevious()).isFalse();
+
+        }
+
+        @Test
+        void buildPaginated_shouldCreatePaginatedDataSolicitudeReportWithData_whenFilterHasThreePages(){
+            SolicitudeReport report = SolicitudeReport.builder()
+                    .solicitudeId(1)
+                    .build();
+            List<SolicitudeReport> page = List.of(report,report,report);
+            PageableData pageable = PageableData.builder()
+                    .page(1)
+                    .size(1)
+                    .build();
+            SolicitudeReportFilter filter = SolicitudeReportFilter.builder()
+                    .pageable(pageable)
+                    .build();
+            Long totalElements = 3L;
+
+            PaginatedData<SolicitudeReport> paged = ReportUtils.buildPaginated(filter,page,totalElements);
+
+            assertThat(paged).isNotNull();
+            assertThat(paged.getContent()).isNotNull();
+            assertThat(paged.getContent()).hasSize(3);
+            assertThat(paged.getCurrentPage()).isEqualTo(1);
+            assertThat(paged.getPageSize()).isEqualTo(1);
+            assertThat(paged.getTotalElements()).isEqualTo(totalElements);
+            assertThat(paged.getTotalPages()).isEqualTo(3);
+            assertThat(paged.isHasNext()).isTrue();
+            assertThat(paged.isHasPrevious()).isTrue();
+
         }
     }
 }

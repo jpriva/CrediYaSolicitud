@@ -16,6 +16,7 @@ import co.com.pragma.model.state.exceptions.StateNotFoundException;
 import co.com.pragma.model.state.gateways.StateRepository;
 import co.com.pragma.model.transaction.gateways.TransactionalPort;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,9 +26,12 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -73,7 +77,7 @@ class SolicitudeUseCaseTest {
                 .loanType(LoanType.builder().loanTypeId(1).build())
                 .build();
 
-        when(transactionalPort.transactional(any(Mono.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().when(transactionalPort.transactional(any(Mono.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
@@ -181,5 +185,43 @@ class SolicitudeUseCaseTest {
         StepVerifier.create(solicitudeUseCase.saveSolicitude(invalidSolicitude, "12345", testJwtData))
                 .expectError()
                 .verify();
+    }
+
+    @Nested
+    class ApproveSolicitudeTests {
+
+        @Test
+        void shouldApproveSolicitudeSuccessfully() {
+            Integer solicitudeId = 1;
+            Solicitude existingSolicitude = testSolicitude.toBuilder().solicitudeId(solicitudeId).build();
+
+            when(solicitudeRepository.findById(solicitudeId)).thenReturn(Mono.just(existingSolicitude));
+            when(solicitudeRepository.save(any(Solicitude.class))).thenAnswer(invocation -> {
+                Solicitude toSave = invocation.getArgument(0);
+                assertThat(toSave.getState().getName()).isEqualTo(DefaultValues.APPROVED_STATE);
+                return Mono.just(toSave);
+            });
+
+            Mono<Solicitude> result = solicitudeUseCase.approveSolicitude(solicitudeId);
+
+            StepVerifier.create(result)
+                    .expectNextMatches(approved ->
+                            Objects.equals(approved.getState().getName(), DefaultValues.APPROVED_STATE) &&
+                                    approved.getSolicitudeId().equals(solicitudeId)
+                    )
+                    .verifyComplete();
+        }
+
+        @Test
+        void shouldFailToApproveWhenSolicitudeIsNotFound() {
+            Integer nonExistentId = 99;
+            when(solicitudeRepository.findById(nonExistentId)).thenReturn(Mono.empty());
+
+            Mono<Solicitude> result = solicitudeUseCase.approveSolicitude(nonExistentId);
+
+            StepVerifier.create(result)
+                    .expectError(SolicitudeNullException.class)
+                    .verify();
+        }
     }
 }

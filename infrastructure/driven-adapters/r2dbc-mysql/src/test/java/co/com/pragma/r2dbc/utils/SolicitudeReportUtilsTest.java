@@ -1,6 +1,7 @@
 package co.com.pragma.r2dbc.utils;
 
 import co.com.pragma.model.constants.DefaultValues;
+import co.com.pragma.model.page.PageableData;
 import co.com.pragma.model.solicitude.reports.SolicitudeReportFilter;
 import co.com.pragma.r2dbc.reports.utils.SolicitudeReportUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -164,9 +165,12 @@ class SolicitudeReportUtilsTest {
 
         @Test
         void withSortByValue_shouldOrderByMonto() {
-            SolicitudeReportFilter filter = SolicitudeReportFilter.builder()
-                    .sortBy("value")
+            PageableData pageable = PageableData.builder()
+                    .sortBy("monto")
                     .sortDirection("ASC")
+                    .build();
+            SolicitudeReportFilter filter = SolicitudeReportFilter.builder()
+                    .pageable(pageable)
                     .build();
 
             String orderBy = SolicitudeReportUtils.buildOrderBy(filter);
@@ -176,9 +180,12 @@ class SolicitudeReportUtilsTest {
 
         @Test
         void withSortByEmail_andDescDirection_shouldOrderByEmailDesc() {
-            SolicitudeReportFilter filter = SolicitudeReportFilter.builder()
+            PageableData pageable = PageableData.builder()
                     .sortBy("email")
                     .sortDirection("DESC")
+                    .build();
+            SolicitudeReportFilter filter = SolicitudeReportFilter.builder()
+                    .pageable(pageable)
                     .build();
 
             String orderBy = SolicitudeReportUtils.buildOrderBy(filter);
@@ -188,13 +195,17 @@ class SolicitudeReportUtilsTest {
 
         @ParameterizedTest
         @CsvSource(value = {
-                "state, ' ORDER BY e.nombre DESC'",
+                "estado, ' ORDER BY e.nombre DESC'",
+                "tipo_prestamo, ' ORDER BY tp.nombre DESC'",
                 "invalidField, ' ORDER BY s.id_solicitud DESC'",
                 "null, ' ORDER BY s.id_solicitud DESC'"
         }, nullValues = "null")
         void buildOrderBy_shouldHandleDifferentSortByInputs(String sortBy, String expectedClause) {
-            SolicitudeReportFilter filter = SolicitudeReportFilter.builder()
+            PageableData pageable = PageableData.builder()
                     .sortBy(sortBy)
+                    .build();
+            SolicitudeReportFilter filter = SolicitudeReportFilter.builder()
+                    .pageable(pageable)
                     .build();
 
             String orderBy = SolicitudeReportUtils.buildOrderBy(filter);
@@ -204,7 +215,12 @@ class SolicitudeReportUtilsTest {
 
         @Test
         void withBlankSortBy_shouldUseDefaultSort() {
-            SolicitudeReportFilter filter = SolicitudeReportFilter.builder().sortBy(" ").build();
+            PageableData pageable = PageableData.builder()
+                    .sortBy(" ")
+                    .build();
+            SolicitudeReportFilter filter = SolicitudeReportFilter.builder()
+                    .pageable(pageable)
+                    .build();
 
             String orderBy = SolicitudeReportUtils.buildOrderBy(filter);
 

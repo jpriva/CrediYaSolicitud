@@ -14,6 +14,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+import static java.util.Collections.emptyList;
+
 @RequiredArgsConstructor
 public class SolicitudeReportUseCase {
 
@@ -46,28 +48,31 @@ public class SolicitudeReportUseCase {
         logger.info("Client filters detected. Fetching users first.");
         return userPort.getUserByFilter(filter)
                 .collectMap(UserProjection::getEmail)
-                .filter(map -> !map.isEmpty())
-                .flatMapMany(usersMap -> {
-                    filter.setEmailsIn(usersMap.keySet().stream().toList());
-                    return repository.findSolicitudeReport(filter)
-                            .map(report ->
-                                    ReportUtils.buildReport(report, usersMap.get(report.getClientEmail()))
-                            );
-                })
-                .collectList()
-                .flatMap(list -> getPaginatedReport(filter, list));
+                .flatMap(usersMap -> {
+                    if (usersMap.isEmpty()) {
+                        return Mono.just(ReportUtils.buildPaginated(filter, emptyList(), 0L));
+                    }
+                    SolicitudeReportFilter newFilter = filter.toBuilder()
+                            .emailsIn(usersMap.keySet().stream().toList())
+                            .build();
+                    return repository.findSolicitudeReport(newFilter)
+                            .map(report -> ReportUtils.buildReport(report, usersMap.get(report.getClientEmail())))
+                            .collectList()
+                            .flatMap(list -> getPaginatedReport(newFilter, list));
+                });
     }
 
     private Mono<PaginatedData<SolicitudeReport>> getSolicitudesFirst(SolicitudeReportFilter filter) {
         logger.info("No client filters detected. Fetching solicitudes first.");
         return repository.findSolicitudeReport(filter)
-                .collectList()
-                .filter(solicitudes -> !solicitudes.isEmpty())
-                .flatMapMany(solicitudes ->
-                        ReportUtils.getUserData(userPort, solicitudes)
-                )
-                .collectList()
-                .flatMap(list -> getPaginatedReport(filter, list))
+                .collectList().flatMap(solicitudes -> {
+                    if (solicitudes.isEmpty()) {
+                        return Mono.just(ReportUtils.buildPaginated(filter, solicitudes, 0L));
+                    }
+                    return ReportUtils.getUserData(userPort, solicitudes)
+                            .collectList()
+                            .flatMap(list -> getPaginatedReport(filter, list));
+                })
                 .doOnError(ex -> logger.error("Error getting solicitude report", ex))
                 .doOnNext(report -> logger.debug("Solicitude Report Page: {}", report));
     }

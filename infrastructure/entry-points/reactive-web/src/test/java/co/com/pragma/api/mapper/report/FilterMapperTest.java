@@ -8,12 +8,33 @@ import org.springframework.util.MultiValueMap;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class FilterMapperTest {
 
     @Test
     void toFilter_withAllParams_shouldMapAllFields() {
+        MultiValueMap<String, String> params = getStringStringMultiValueMap();
+
+        SolicitudeReportFilter filter = FilterMapper.toFilter(params);
+
+        assertEquals("test@example.com", filter.getClientEmail());
+        assertEquals("John Doe", filter.getClientName());
+        assertEquals("123456789", filter.getClientIdNumber());
+        assertEquals("Personal", filter.getLoanTypeName());
+        assertEquals("Approved", filter.getStateName());
+        assertEquals(new BigDecimal("1000.00"), filter.getMinValue());
+        assertEquals(new BigDecimal("5000.00"), filter.getMaxValue());
+        assertEquals(new BigDecimal("2000.00"), filter.getMinBaseSalary());
+        assertEquals(new BigDecimal("6000.00"), filter.getMaxBaseSalary());
+        assertEquals(1, filter.getPageable().getPage());
+        assertEquals(20, filter.getPageable().getSize());
+        assertEquals("clientName", filter.getPageable().getSortBy());
+        assertEquals("DESC", filter.getPageable().getSortDirection());
+    }
+
+    private static MultiValueMap<String, String> getStringStringMultiValueMap() {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add(FilterParams.CLIENT_EMAIL, "test@example.com");
         params.add(FilterParams.CLIENT_NAME, "John Doe");
@@ -28,22 +49,7 @@ class FilterMapperTest {
         params.add(FilterParams.SIZE, "20");
         params.add(FilterParams.SORT_BY, "clientName");
         params.add(FilterParams.SORT_DIRECTION, "DESC");
-
-        SolicitudeReportFilter filter = FilterMapper.toFilter(params);
-
-        assertEquals("test@example.com", filter.getClientEmail());
-        assertEquals("John Doe", filter.getClientName());
-        assertEquals("123456789", filter.getClientIdNumber());
-        assertEquals("Personal", filter.getLoanTypeName());
-        assertEquals("Approved", filter.getStateName());
-        assertEquals(new BigDecimal("1000.00"), filter.getMinValue());
-        assertEquals(new BigDecimal("5000.00"), filter.getMaxValue());
-        assertEquals(new BigDecimal("2000.00"), filter.getMinBaseSalary());
-        assertEquals(new BigDecimal("6000.00"), filter.getMaxBaseSalary());
-        assertEquals(1, filter.getPage());
-        assertEquals(20, filter.getSize());
-        assertEquals("clientName", filter.getSortBy());
-        assertEquals("DESC", filter.getSortDirection());
+        return params;
     }
 
     @Test
@@ -61,10 +67,10 @@ class FilterMapperTest {
         assertNull(filter.getMaxValue());
         assertNull(filter.getMinBaseSalary());
         assertNull(filter.getMaxBaseSalary());
-        assertEquals(FilterParams.DEFAULT_PAGE, filter.getPage());
-        assertEquals(FilterParams.DEFAULT_SIZE, filter.getSize());
-        assertNull(filter.getSortBy());
-        assertNull(filter.getSortDirection());
+        assertEquals(FilterParams.DEFAULT_PAGE, filter.getPageable().getPage());
+        assertEquals(FilterParams.DEFAULT_SIZE, filter.getPageable().getSize());
+        assertNull(filter.getPageable().getSortBy());
+        assertNull(filter.getPageable().getSortDirection());
     }
 
     @Test
@@ -76,7 +82,7 @@ class FilterMapperTest {
         SolicitudeReportFilter filter = FilterMapper.toFilter(params);
 
         assertNull(filter.getMinValue());
-        assertEquals(FilterParams.DEFAULT_PAGE, filter.getPage());
+        assertEquals(FilterParams.DEFAULT_PAGE, filter.getPageable().getPage());
     }
 
     @Test

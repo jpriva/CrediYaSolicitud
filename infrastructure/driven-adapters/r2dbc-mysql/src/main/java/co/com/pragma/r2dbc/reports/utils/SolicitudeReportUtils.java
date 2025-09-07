@@ -94,7 +94,7 @@ public class SolicitudeReportUtils {
             String sortField = switch (filter.getPageable().getSortBy()) {
                 case "monto" -> "s.monto";
                 case "email" -> "s.email";
-                case "estado" -> "e.nomebre";
+                case "estado" -> "e.nombre";
                 case "tipo_prestamo" -> "tp.nombre";
                 default -> "s.id_solicitud";
             };

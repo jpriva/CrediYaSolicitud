@@ -1,5 +1,6 @@
 package co.com.pragma.api.config;
 
+import co.com.pragma.api.mapper.page.PageMapper;
 import co.com.pragma.api.mapper.report.SolicitudeReportMapper;
 import co.com.pragma.api.solicitude.SolicitudeHandler;
 import co.com.pragma.api.solicitude.SolicitudeRouterRest;
@@ -43,6 +44,9 @@ class ConfigTest {
 
     @MockitoBean
     private SolicitudeReportMapper solicitudeReportMapper;
+
+    @MockitoBean
+    private PageMapper pageMapper;
 
     @Test
     void corsConfigurationShouldAllowOrigins() {

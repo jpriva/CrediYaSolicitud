@@ -1,11 +1,9 @@
 package co.com.pragma.api.solicitude;
 
-import co.com.pragma.api.dto.page.PaginatedResponseDTO;
-import co.com.pragma.api.dto.reports.SolicitudeReportResponseDTO;
 import co.com.pragma.api.dto.solicitude.SolicitudeRequestDTO;
 import co.com.pragma.api.mapper.page.PageMapper;
-import co.com.pragma.api.mapper.report.SolicitudeReportMapper;
 import co.com.pragma.api.mapper.report.FilterMapper;
+import co.com.pragma.api.mapper.report.SolicitudeReportMapper;
 import co.com.pragma.api.mapper.solicitude.SolicitudeMapper;
 import co.com.pragma.model.exceptions.InvalidCredentialsException;
 import co.com.pragma.model.jwt.JwtData;
@@ -21,8 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -62,14 +58,7 @@ public class SolicitudeHandler {
         SolicitudeReportFilter filter = FilterMapper.toFilter(serverRequest.queryParams());
         return Mono.just(filter)
                 .flatMap(solicitudeReportUseCase::getSolicitudeReport)
-                .map(paginatedData -> {
-                    PaginatedResponseDTO<SolicitudeReportResponseDTO> responsePage = pageMapper.toDto(paginatedData);
-                    List<SolicitudeReportResponseDTO> contentDto = paginatedData.getContent().stream()
-                            .map(solicitudeReportMapper::toResponseDto)
-                            .toList();
-                    responsePage.setContent(contentDto);
-                    return responsePage;
-                })
+                .map(pageMapper::toDto)
                 .flatMap(responsePage ->
                         ServerResponse.ok()
                                 .contentType(MediaType.APPLICATION_JSON)

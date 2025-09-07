@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = SolicitudeReportMapperImpl.class) // Load the MapStruct implementation
+@ContextConfiguration(classes = SolicitudeReportMapperImpl.class)
 class SolicitudeReportMapperTest {
 
     @Autowired
