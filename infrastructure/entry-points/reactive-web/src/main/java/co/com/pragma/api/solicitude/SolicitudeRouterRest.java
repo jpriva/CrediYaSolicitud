@@ -15,6 +15,7 @@ public class SolicitudeRouterRest {
         return RouterFunctions.route()
                 .POST(ApiConstants.ApiPath.SOLICITUDE_PATH, handler::listenPOSTSaveSolicitudeUseCase)
                 .GET(ApiConstants.ApiPath.SOLICITUDE_PATH, handler::listenGETSolicitudeReportUseCase)
+                .PUT(ApiConstants.ApiPath.SOLICITUDE_UPDATE_PATH, handler::listenPUTUpdateSolicitudeStatusUseCase)
                 .build();
     }
 }

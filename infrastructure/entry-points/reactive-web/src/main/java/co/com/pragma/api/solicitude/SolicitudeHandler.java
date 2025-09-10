@@ -1,6 +1,7 @@
 package co.com.pragma.api.solicitude;
 
 import co.com.pragma.api.dto.solicitude.SolicitudeRequestDTO;
+import co.com.pragma.api.dto.solicitude.UpdateStatusRequestDTO;
 import co.com.pragma.api.mapper.page.PageMapper;
 import co.com.pragma.api.mapper.report.FilterMapper;
 import co.com.pragma.api.mapper.report.SolicitudeReportMapper;
@@ -63,6 +64,24 @@ public class SolicitudeHandler {
                         ServerResponse.ok()
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .bodyValue(responsePage)
+                );
+    }
+
+    public Mono<ServerResponse> listenPUTUpdateSolicitudeStatusUseCase(ServerRequest serverRequest) {
+        Integer solicitudeId = Integer.valueOf(serverRequest.pathVariable("id"));
+        return serverRequest.bodyToMono(UpdateStatusRequestDTO.class)
+                .flatMap(updateRequest -> {
+                    String state =updateRequest.getState();
+                    return solicitudeUseCase.approveRejectSolicitudeState(
+                            solicitudeId,
+                            state
+                    );
+                })
+                .map(solicitudeMapper::toResponseDto)
+                .flatMap(updatedSolicitude ->
+                        ServerResponse.ok()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(updatedSolicitude)
                 );
     }
 }

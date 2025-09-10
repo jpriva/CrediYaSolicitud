@@ -13,6 +13,7 @@ public class ApiConstants {
         public static final String LOAN_TYPE_PATH = BASE_PATH + "/tipoprestamo";
         public static final String STATE_PATH = BASE_PATH + "/estado";
         public static final String SOLICITUDE_PATH = BASE_PATH + "/solicitud";
+        public static final String SOLICITUDE_UPDATE_PATH = SOLICITUDE_PATH + "/{id}";
         public static final String API_REPORT_PATH = BASE_PATH + "/report";
         public static final String SWAGGER_PATH = "/swagger-ui.html";
         public static final String DUMMY_SOLICITUDE_DOC_ROUTE = "/dummy-solicitude-doc-route";
@@ -46,28 +47,6 @@ public class ApiConstants {
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static final class Report {
-        // --- Report Request Schema ---
-        public static final String REPORT_REQ_SCHEMA_NAME = "Loan Application Report Request";
-        public static final String REPORT_REQ_SCHEMA_DESC = "DTO to filter, paginate, and sort the loan application report.";
-        public static final String REPORT_REQ_CLIENT_EMAIL_DESC = "Filter by client email.";
-        public static final String REPORT_REQ_CLIENT_NAME_DESC = "Filter by client name (partial search).";
-        public static final String REPORT_REQ_CLIENT_ID_DESC = "Filter by client identification.";
-        public static final String REPORT_REQ_LOAN_TYPE_DESC = "Filter by loan type.";
-        public static final String REPORT_REQ_STATE_DESC = "Filter by application state.";
-        public static final String REPORT_REQ_MIN_VALUE_DESC = "Minimum application value for the filter.";
-        public static final String REPORT_REQ_MAX_VALUE_DESC = "Maximum application value for the filter.";
-        public static final String REPORT_REQ_MIN_SALARY_DESC = "Minimum client base salary for the filter.";
-        public static final String REPORT_REQ_MAX_SALARY_DESC = "Maximum client base salary for the filter.";
-        // --- Examples ---
-        public static final String EXAMPLE_CLIENT_EMAIL = "john.doe@example.com";
-        public static final String EXAMPLE_CLIENT_NAME = "John";
-        public static final String EXAMPLE_CLIENT_ID = "123456789";
-        public static final String EXAMPLE_LOAN_TYPE = "CREDI-HOGAR";
-        public static final String EXAMPLE_STATE = "APROBADO";
-        public static final String EXAMPLE_MIN_VALUE = "10000.00";
-        public static final String EXAMPLE_MAX_VALUE = "50000.00";
-        public static final String EXAMPLE_MIN_SALARY = "2000000.00";
-        public static final String EXAMPLE_MAX_SALARY = "5000000.00";
 
         // --- Report Response Schema ---
         public static final String REPORT_RES_SCHEMA_NAME = "Loan Application Report Response";
@@ -100,20 +79,6 @@ public class ApiConstants {
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static final class Pageable {
-        //Schema
-        public static final String SCHEMA_NAME = "PageableRequest";
-        public static final String SCHEMA_DESC = "DTO for pagination and sorting parameters.";
-
-        // --- Examples ---
-        public static final String EXAMPLE_SORT_BY_VALUE = "monto";
-        public static final String EXAMPLE_SORT_DIR_DESC = "DESC";
-
-        // --- Pagination and Sorting ---
-        public static final String PAGEABLE_PAGE_DESC = "Page number to request (starts at 0).";
-        public static final String PAGEABLE_SIZE_DESC = "Number of records per page.";
-        public static final String PAGEABLE_SORT_BY_DESC = "Field to sort the results by.";
-        public static final String PAGEABLE_SORT_DIR_DESC = "Sort direction.";
-
         // --- Sort By Values (for allowableValues) ---
         public static final String SORT_BY_VALUE = "monto";
         public static final String SORT_BY_CLIENT_EMAIL = "email";
@@ -128,12 +93,28 @@ public class ApiConstants {
         public static final String DEFAULT_PAGE = "0";
         public static final String DEFAULT_SIZE = "10";
         public static final String REPORT_REQ_PAGEABLE_DESC = "Pagination and sorting parameters.";
+
+        // --- Paginated Response Schema ---
+        public static final String PAGINATED_RESPONSE_SCHEMA_DESC = "Container for paginated list results.";
+        public static final String PAGINATED_CONTENT_DESC = "The content of the current page.";
+        public static final String PAGINATED_CURRENT_PAGE_DESC = "The current page number (0-indexed).";
+        public static final String PAGINATED_PAGE_SIZE_DESC = "The number of elements requested per page.";
+        public static final String PAGINATED_TOTAL_ELEMENTS_DESC = "The total number of elements across all pages.";
+        public static final String PAGINATED_TOTAL_PAGES_DESC = "The total number of pages available.";
+        public static final String PAGINATED_HAS_NEXT_DESC = "Indicates if there is a next page.";
+        public static final String PAGINATED_HAS_PREVIOUS_DESC = "Indicates if there is a previous page.";
+        public static final String EXAMPLE_PAGINATED_CURRENT_PAGE = "0";
+        public static final String EXAMPLE_PAGINATED_PAGE_SIZE = "10";
+        public static final String EXAMPLE_PAGINATED_TOTAL_ELEMENTS = "100";
+        public static final String EXAMPLE_PAGINATED_TOTAL_PAGES = "10";
+        public static final String EXAMPLE_PAGINATED_HAS_NEXT = "true";
+        public static final String EXAMPLE_PAGINATED_HAS_PREVIOUS = "false";
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static final class ReportDocs {
         // --- Operation Summaries & Descriptions ---
-        public static final String REPORT_OP_SUMMARY = "Get a paginated report of loan applications";
+        public static final String REPORT_OP_SUMMARY = "Get a paginated report of loan applications for advisor's role only";
         public static final String REPORT_OP_DESC = "Retrieves a list of loan applications based on the provided filter, sort, and pagination criteria.";
 
         // --- Parameter Descriptions ---
@@ -160,6 +141,8 @@ public class ApiConstants {
         public static final String RES_200_DESC = "Report generated successfully.";
         public static final String RES_401_DESC = "Unauthorized. A valid token is required.";
         public static final String RES_500_DESC = "Internal server error.";
+
+        public static final String PAGINATED_REPORT_SCHEMA_DESCRIPTION = "A paginated list of loan application reports.";
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -190,5 +173,156 @@ public class ApiConstants {
         public static final String TITLE_API = "Crediya Auth API Microservice";
         public static final String VERSION_API = "1.0.0";
         public static final String DESCRIPTION_API = "This is the API for Crediya Auth Microservice";
+    }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class StateChangeDocs {
+        // --- Operation Summaries & Descriptions ---
+        public static final String APPROVE_REJECT_OP_SUMMARY = "Update loan application state for advisor's role only.";
+        public static final String APPROVE_REJECT_OP_DESC = "Updates the state of a loan application to either 'APROBADO' or 'RECHAZADO'.";
+
+        // --- Response Types ---
+        public static final String RES_TYPE_STRING = "string";
+        public static final String RES_TYPE_NUMBER = "number";
+        public static final String RES_TYPE_INTEGER = "integer";
+
+        // --- Response Descriptions ---
+        public static final String RES_200_DESC = "Report generated successfully.";
+        public static final String RES_401_DESC = "Unauthorized. A valid token is required.";
+        public static final String RES_500_DESC = "Internal server error.";
+
+        // --- Request Schema ---
+        public static final String UPDATE_STATE_DESC = "The new state for the solicitude.";
+        public static final String EXAMPLE_UPDATE_STATE = "APROBADO";
+        public static final String APPROVED_STATE = "APROBADO";
+        public static final String REJECTED_STATE = "RECHAZADO";
+    }
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class ApiOperations {
+        public static final String GET_ALL_LOAN_TYPES_SUMMARY = "Get all loan types";
+        public static final String GET_ALL_LOAN_TYPES_DESCRIPTION = "Returns a list of all available loan types.";
+        public static final String SAVE_SOLICITUDE_SUMMARY = "Create a new loan application";
+        public static final String SAVE_SOLICITUDE_DESCRIPTION = "Receives the data to create a new loan application and returns the created object.";
+        public static final String OPERATION_SAVE_SOLICITUDE_ID = "saveLoanApplication";
+        public static final String OPERATION_REPORT_SOLICITUDE_ID = "getReportLoans";
+        public static final String OPERATION_SAVE_SOLICITUDE_BODY_DESC = "Loan Application Requested Data";
+        public static final String OPERATION_UPDATE_SOLICITUDE_STATUS_ID = "updateSolicitudeStatus";
+        public static final String OPERATION_REPORT_BODY_DESC = "Report filters and pagination Requested Data";
+    }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class ApiResponses {
+        public static final String RESPONSE_OK_CODE = "200";
+        public static final String RESPONSE_CREATED_CODE = "201";
+        public static final String RESPONSE_BAD_REQUEST_CODE = "400";
+        public static final String RESPONSE_NOT_FOUND_CODE = "404";
+        public static final String RESPONSE_CONFLICT_CODE = "409";
+        public static final String RESPONSE_REPORT_OK_DESC = "Fetch Report Successfully";
+        public static final String RESPONSE_SAVE_SOLICITUDE_CREATED_DESC = "Loan Application Created Successfully";
+        public static final String RESPONSE_SAVE_SOLICITUDE_BAD_REQUEST_DESC = "Invalid request (e.g. missing or incorrectly formatted data)";
+        public static final String RESPONSE_SAVE_SOLICITUDE_CONFLICT_DESC = "Data conflict (e.g. email already exists)";
+        public static final String RESPONSE_UPDATE_SOLICITUDE_OK_DESC = "Loan Application status updated successfully";
+        public static final String RESPONSE_UPDATE_SOLICITUDE_NOT_FOUND_DESC = "The loan application with the specified ID was not found.";
+    }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class Schemas {
+        public static final String SOLICITUDE_RESPONSE_SCHEMA_NAME = "Loan Application Response";
+        public static final String SOLICITUDE_RESPONSE_SCHEMA_DESCRIPTION = "Loan Application Data.";
+        public static final String STATE_SCHEMA_NAME = "State";
+        public static final String STATE_SCHEMA_DESCRIPTION = "State Data.";
+        public static final String LOAN_TYPE_SCHEMA_NAME = "Loan Type";
+        public static final String LOAN_TYPE_SCHEMA_DESCRIPTION = "Loan Type Data.";
+        public static final String LOAN_TYPE_REQUEST_SCHEMA_NAME = "Loan Type Request";
+        public static final String LOAN_TYPE_REQUEST_SCHEMA_DESCRIPTION = "Loan Type Data.";
+        public static final String SOLICITUDE_REQUEST_SCHEMA_NAME = "Loan Application Request";
+        public static final String SOLICITUDE_REQUEST_SCHEMA_DESCRIPTION = "Loan Application Data.";
+        public static final String ERROR_SCHEMA_NAME = "Error Response";
+        public static final String ERROR_SCHEMA_DESCRIPTION = "Error Response Details";
+        public static final String PAGINATED_RESPONSE_SCHEMA_NAME = "PaginatedResponse";
+        public static final String PAGINATED_REPORT_SCHEMA_NAME = "PaginatedSolicitudeReportResponse";
+    }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class SolicitudeDocs {
+        public static final String UPDATE_SOLICITUDE_STATUS_SUMMARY = "Update the status of a loan application for advisor's role only";
+        public static final String UPDATE_SOLICITUDE_STATUS_DESCRIPTION = "Updates the status of a specific loan application to 'APROBADO' or 'RECHAZADO'.";
+        public static final String UPDATE_SOLICITUDE_STATUS_BODY_DESC = "The new status for the application.";
+
+
+        public static final String SOLICITUDE_ID_DESCRIPTION = "Loan application's unique identifier.";
+        public static final String SOLICITUDE_ID_PARAM_DESCRIPTION = "The unique identifier of the loan application to update.";
+        public static final String SOLICITUDE_VALUE_DESCRIPTION = "Loan application's value.";
+        public static final String SOLICITUDE_DEADLINE_DESCRIPTION = "Loan application's deadline in months.";
+        public static final String SOLICITUDE_EMAIL_DESCRIPTION = "User's email";
+        public static final String SOLICITUDE_STATE_DESCRIPTION = "State of the Loan application.";
+        public static final String SOLICITUDE_LOAN_TYPE_DESCRIPTION = "Loan Type of the Loan application.";
+        public static final String EXAMPLE_SOLICITUDE_ID = "123";
+        public static final String EXAMPLE_SOLICITUDE_VALUE = "123456.78";
+        public static final String EXAMPLE_SOLICITUDE_DEADLINE = "12";
+        public static final String EXAMPLE_EMAIL = "john.doe@example.com";
+        public static final String EXAMPLE_ID_NUMBER = "123456789";
+
+        // Request Schema
+        public static final String SOLICITUDE_REQUEST_VALUE_DESCRIPTION = "Loan application's value.";
+        public static final String SOLICITUDE_REQUEST_DEADLINE_DESCRIPTION = "Loan application's deadline in months.";
+        public static final String SOLICITUDE_REQUEST_EMAIL_DESCRIPTION = "User's email";
+        public static final String SOLICITUDE_REQUEST_ID_NUMBER_DESCRIPTION = "User's id number";
+        public static final String SOLICITUDE_REQUEST_LOAN_TYPE_DESCRIPTION = "Loan Type.";
+
+        // Validations
+        public static final String VALIDATION_VALUE_NOT_NULL = "Value can't be null";
+        public static final String VALIDATION_VALUE_MIN = "Minimum value depends on loan type";
+        public static final String VALIDATION_VALUE_MAX = "Maximum value depends on loan type";
+        public static final String VALIDATION_DEADLINE_NOT_NULL = "Deadline can't be null";
+        public static final String VALIDATION_DEADLINE_MIN = "Minimum value must be at least 1";
+        public static final String VALIDATION_DEADLINE_MAX = "Maximum value must be at least 360, equivalent to 30 years";
+        public static final String VALIDATION_EMAIL_NOT_BLANK = "Email can't be blank";
+        public static final String VALIDATION_ID_NUMBER_NOT_BLANK = "Id number can't be blank";
+        public static final String VALIDATION_EMAIL_FORMAT = "Email must be in a valid format";
+        public static final String VALIDATION_LOAN_TYPE_NOT_NULL = "Loan Type can't be null";
+        public static final String SOLICITUDE_OP_SUMMARY = "Saves a new Loan Application for client's role only.";
+        public static final String SOLICITUDE_OP_DESC = "Saves a new Loan Application for clients only.";
+    }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class StateDocs {
+        public static final String STATE_ID_DESCRIPTION = "State identifier.";
+        public static final String STATE_NAME_DESCRIPTION = "State name.";
+        public static final String STATE_DESCRIPTION_DESCRIPTION = "State description.";
+        public static final String EXAMPLE_STATE_ID = "1";
+        public static final String EXAMPLE_STATE_NAME = "PENDIENTE";
+        public static final String EXAMPLE_STATE_DESCRIPTION = "La solicitud está pendiente de revisión.";
+    }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class LoanTypeDocs {
+        public static final String LOAN_TYPE_ID_DESCRIPTION = "Loan Type identifier.";
+        public static final String LOAN_TYPE_NAME_DESCRIPTION = "Loan Type name.";
+        public static final String LOAN_TYPE_MIN_VALUE_DESCRIPTION = "Minimum amount for the loan type.";
+        public static final String LOAN_TYPE_MAX_VALUE_DESCRIPTION = "Maximum amount for the loan type.";
+        public static final String LOAN_TYPE_INTEREST_RATE_DESCRIPTION = "Interest rate for the loan type.";
+        public static final String LOAN_TYPE_AUTO_VALIDATION_DESCRIPTION = "Indicates if the loan type has automatic validation.";
+        public static final String EXAMPLE_LOAN_TYPE_ID = "1";
+        public static final String EXAMPLE_LOAN_TYPE_NAME = "CREDI-HOGAR";
+        public static final String EXAMPLE_LOAN_TYPE_MIN_VALUE = "50000000.00";
+        public static final String EXAMPLE_LOAN_TYPE_MAX_VALUE = "800000000.00";
+        public static final String EXAMPLE_LOAN_TYPE_INTEREST_RATE = "7.20";
+        public static final String EXAMPLE_LOAN_TYPE_AUTO_VALIDATION = "false";
+
+        // Request Schema
+        public static final String LOAN_TYPE_REQUEST_ID_DESCRIPTION = "Loan type id";
+        public static final String VALIDATION_LOAN_TYPE_ID_NOT_NULL = "Loan type id can't be null";
+    }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class ErrorDocs {
+        public static final String ERROR_TIMESTAMP_DESCRIPTION = "Timestamp of when the error occurred.";
+        public static final String ERROR_PATH_DESCRIPTION = "The path where the error occurred.";
+        public static final String ERROR_CODE_DESCRIPTION = "A unique code identifying the error.";
+        public static final String ERROR_MESSAGE_DESCRIPTION = "A human-readable message describing the error.";
+        public static final String EXAMPLE_ERROR_TIMESTAMP = "2025-01-01T00:00:00.000Z";
+        public static final String EXAMPLE_ERROR_CODE = "DOM-001";
+        public static final String EXAMPLE_ERROR_MESSAGE = "An error occurred while processing the request.";
     }
 }

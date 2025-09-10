@@ -1,7 +1,6 @@
 package co.com.pragma.api.solicitude.documentation;
 
 import co.com.pragma.api.constants.ApiConstants;
-import co.com.pragma.api.constants.Constants;
 import co.com.pragma.api.dto.ErrorDTO;
 import co.com.pragma.api.dto.reports.SolicitudeReportPaginatedResponseDTO;
 import co.com.pragma.api.solicitude.SolicitudeHandler;
@@ -36,7 +35,7 @@ public class ReportsDocumentation {
                     operation = @Operation(
                             summary = ApiConstants.ReportDocs.REPORT_OP_SUMMARY,
                             description = ApiConstants.ReportDocs.REPORT_OP_DESC,
-                            operationId = Constants.OPERATION_REPORT_SOLICITUDE_ID,
+                            operationId = ApiConstants.ApiOperations.OPERATION_REPORT_SOLICITUDE_ID,
                             parameters = {
                                     @Parameter(in = ParameterIn.QUERY, name = ApiConstants.FilterParams.CLIENT_EMAIL, description = ApiConstants.ReportDocs.PARAM_CLIENT_EMAIL_DESC, schema = @Schema(type = ApiConstants.ReportDocs.RES_TYPE_STRING)),
                                     @Parameter(in = ParameterIn.QUERY, name = ApiConstants.FilterParams.CLIENT_NAME, description = ApiConstants.ReportDocs.PARAM_CLIENT_NAME_DESC, schema = @Schema(type = ApiConstants.ReportDocs.RES_TYPE_STRING)),
@@ -54,13 +53,13 @@ public class ReportsDocumentation {
                             },
                             responses = {
                                     @ApiResponse(
-                                            responseCode = Constants.RESPONSE_OK_CODE,
-                                            description = Constants.RESPONSE_REPORT_OK_DESC,
+                                            responseCode = ApiConstants.ApiResponses.RESPONSE_OK_CODE,
+                                            description = ApiConstants.ApiResponses.RESPONSE_REPORT_OK_DESC,
                                             content = @Content(schema = @Schema(implementation = SolicitudeReportPaginatedResponseDTO.class))
                                     ),
                                     @ApiResponse(
-                                            responseCode = Constants.RESPONSE_BAD_REQUEST_CODE,
-                                            description = Constants.RESPONSE_SAVE_SOLICITUDE_BAD_REQUEST_DESC,
+                                            responseCode = ApiConstants.ApiResponses.RESPONSE_BAD_REQUEST_CODE,
+                                            description = ApiConstants.ApiResponses.RESPONSE_SAVE_SOLICITUDE_BAD_REQUEST_DESC,
                                             content = @Content(schema = @Schema(implementation = ErrorDTO.class))
                                     )
                             }

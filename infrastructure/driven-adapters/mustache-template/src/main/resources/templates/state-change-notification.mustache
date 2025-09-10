@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update on Your Loan Application</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { width: 90%; max-width: 600px; margin: 20px auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+        .header { background-color: #0056b3; color: #ffffff; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; }
+        .content { padding: 30px; }
+        .content p { margin-bottom: 20px; }
+        .status-box { padding: 15px; border-radius: 5px; text-align: center; font-weight: bold; font-size: 1.2em; }
+        .approved { background-color: #d4edda; color: #155724; }
+        .rejected { background-color: #f8d7da; color: #721c24; }
+        .pending { background-color: #fff3cd; color: #856404; }
+        .footer { background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 0.9em; color: #6c757d; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>CrediYa</h1>
+    </div>
+    <div class="content">
+        <p>Hello,</p>
+        <p>The state of your loan application has been updated. Here are the details:</p>
+        <ul>
+            <li><strong>Application ID:</strong> <span>{{solicitudeId}}</span></li>
+            <li><strong>Loan Type:</strong> <span>{{loanType}}</span></li>
+            <li><strong>Value:</strong> <span>{{value}}</span></li>
+        </ul>
+        <p>New state:</p>
+        <div class="status-box {{stateClass}}">
+            <span>{{stateName}}</span>
+        </div>
+        <p style="margin-top: 20px;">{{stateDescription}}</p>
+        <p>If you have any questions, please don't hesitate to contact our support team.</p>
+        <p>Sincerely,<br>The CrediYa Team</p>
+    </div>
+    <div class="footer">
+        &copy; 2025 CrediYa. All rights reserved.
+    </div>
+</div>
+</body>
+</html>

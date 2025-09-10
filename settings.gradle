@@ -30,3 +30,9 @@ include ':webclient'
 project(':webclient').projectDir = file('./infrastructure/driven-adapters/webclient')
 include ':jwt-adapter'
 project(':jwt-adapter').projectDir = file('./infrastructure/driven-adapters/jwt-adapter')
+include ':metrics'
+project(':metrics').projectDir = file('./infrastructure/helpers/metrics')
+include ':sqs-sender'
+project(':sqs-sender').projectDir = file('./infrastructure/driven-adapters/sqs-sender')
+include ':mustache-template'
+project(':mustache-template').projectDir = file('./infrastructure/driven-adapters/mustache-template')

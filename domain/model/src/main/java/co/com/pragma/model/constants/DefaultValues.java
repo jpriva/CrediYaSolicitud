@@ -21,6 +21,7 @@ public class DefaultValues {
     public static final String DEADLINE_FIELD = "Deadline";
     public static final String EMAIL_FIELD = "Email";
     public static final String LOAN_TYPE_FIELD = "LoanType";
+    public static final String STATE_FIELD = "State";
     public static final String ID_NUMBER_FIELD = "Id number";
 
     public static final String MOST_BE_BETWEEN = "most be between";

@@ -2,6 +2,7 @@ package co.com.pragma.api.config;
 
 import co.com.pragma.api.constants.ApiConstants;
 import co.com.pragma.api.exception.handler.CustomAccessDeniedHandler;
+import co.com.pragma.api.exception.handler.CustomAuthenticationEntryPoint;
 import co.com.pragma.api.exception.handler.GlobalExceptionHandler;
 import co.com.pragma.model.jwt.JwtData;
 import co.com.pragma.model.jwt.gateways.JwtProviderPort;
@@ -23,7 +24,7 @@ import static org.mockito.Mockito.when;
 @WebFluxTest
 @ContextConfiguration(classes = {
         WebSecurityConfig.class, CustomAccessDeniedHandler.class,
-        GlobalExceptionHandler.class
+        GlobalExceptionHandler.class, CustomAuthenticationEntryPoint.class
 })
 class WebSecurityConfigTest {
 

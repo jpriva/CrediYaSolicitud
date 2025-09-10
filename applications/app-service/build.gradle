@@ -1,6 +1,9 @@
 apply plugin: 'org.springframework.boot'
 
 dependencies {
+	implementation project(':mustache-template')
+	implementation project(':sqs-sender')
+	implementation project(':metrics')
 	implementation project(':jwt-adapter')
 	implementation project(':webclient')
 	implementation project(':reactive-web')
@@ -13,6 +16,11 @@ dependencies {
     testImplementation 'com.tngtech.archunit:archunit:1.4.1'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'org.springframework:spring-tx'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    //ObjectMapper
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
 }
 
 tasks.register('explodedJar', Copy) {
