@@ -33,17 +33,6 @@ public class SQSSenderConfig {
         return builder.build();
     }
 
-    private AwsCredentialsProviderChain getProviderChain() {
-        return AwsCredentialsProviderChain.builder()
-                .addCredentialsProvider(EnvironmentVariableCredentialsProvider.create())
-                .addCredentialsProvider(SystemPropertyCredentialsProvider.create())
-                .addCredentialsProvider(WebIdentityTokenFileCredentialsProvider.create())
-                .addCredentialsProvider(ProfileCredentialsProvider.create())
-                .addCredentialsProvider(ContainerCredentialsProvider.builder().build())
-                .addCredentialsProvider(InstanceProfileCredentialsProvider.create())
-                .build();
-    }
-
     private URI resolveEndpoint(SQSSenderProperties properties) {
         if (properties.endpoint() != null && !properties.endpoint().isEmpty()) {
             return URI.create(properties.endpoint());

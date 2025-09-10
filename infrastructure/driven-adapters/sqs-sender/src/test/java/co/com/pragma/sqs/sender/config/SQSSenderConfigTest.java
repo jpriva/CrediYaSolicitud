@@ -1,5 +1,6 @@
 package co.com.pragma.sqs.sender.config;
 
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProviderChain;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.metrics.MetricPublisher;
 import software.amazon.awssdk.regions.Region;
@@ -95,7 +95,8 @@ class SQSSenderConfigTest {
             // The endpoint override is called with null, which is the correct behavior
             verify(builder).endpointOverride(null);
             verify(builder).region(Region.of(awsRegion));
-            verify(builder).credentialsProvider(any(AwsCredentialsProviderChain.class));
+            // The implementation uses DefaultCredentialsProvider, not the legacy AwsCredentialsProviderChain.
+            verify(builder).credentialsProvider(any(DefaultCredentialsProvider.class));
             verify(builder).overrideConfiguration(any(Consumer.class));
             verify(builder).build();
         }
