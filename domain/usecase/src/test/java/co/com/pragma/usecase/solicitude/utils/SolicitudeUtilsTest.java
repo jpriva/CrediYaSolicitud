@@ -156,8 +156,9 @@ class SolicitudeUtilsTest {
         void shouldPassWhenValueIsWithinRange() {
             Solicitude solicitude = createSolicitudeWithValue("10000.00");
             LoanType loanType = createValidLoanType();
+            solicitude = solicitude.toBuilder().loanType(loanType).build();
 
-            StepVerifier.create(SolicitudeUtils.verifySolicitudeLoanType(solicitude, loanType))
+            StepVerifier.create(SolicitudeUtils.verifySolicitudeLoanType(solicitude))
                     .expectNext(solicitude)
                     .verifyComplete();
         }
@@ -166,8 +167,9 @@ class SolicitudeUtilsTest {
         void shouldPassWhenValueIsExactlyMinValue() {
             Solicitude solicitude = createSolicitudeWithValue("5000.00");
             LoanType loanType = createValidLoanType();
+            solicitude = solicitude.toBuilder().loanType(loanType).build();
 
-            StepVerifier.create(SolicitudeUtils.verifySolicitudeLoanType(solicitude, loanType))
+            StepVerifier.create(SolicitudeUtils.verifySolicitudeLoanType(solicitude))
                     .expectNext(solicitude)
                     .verifyComplete();
         }
@@ -176,8 +178,9 @@ class SolicitudeUtilsTest {
         void shouldFailWhenValueIsBelowMin() {
             Solicitude solicitude = createSolicitudeWithValue("4999.99");
             LoanType loanType = createValidLoanType();
+            solicitude = solicitude.toBuilder().loanType(loanType).build();
 
-            StepVerifier.create(SolicitudeUtils.verifySolicitudeLoanType(solicitude, loanType))
+            StepVerifier.create(SolicitudeUtils.verifySolicitudeLoanType(solicitude))
                     .expectError(ValueOutOfBoundsException.class)
                     .verify();
         }
@@ -186,8 +189,9 @@ class SolicitudeUtilsTest {
         void shouldFailWhenValueIsAboveMax() {
             Solicitude solicitude = createSolicitudeWithValue("50000.01");
             LoanType loanType = createValidLoanType();
+            solicitude = solicitude.toBuilder().loanType(loanType).build();
 
-            StepVerifier.create(SolicitudeUtils.verifySolicitudeLoanType(solicitude, loanType))
+            StepVerifier.create(SolicitudeUtils.verifySolicitudeLoanType(solicitude))
                     .expectError(ValueOutOfBoundsException.class)
                     .verify();
         }
@@ -196,8 +200,9 @@ class SolicitudeUtilsTest {
         void shouldFailWhenLoanTypeMinValueIsNull() {
             Solicitude solicitude = createSolicitudeWithValue("10000.00");
             LoanType loanType = createValidLoanType().toBuilder().minValue(null).build();
+            solicitude = solicitude.toBuilder().loanType(loanType).build();
 
-            StepVerifier.create(SolicitudeUtils.verifySolicitudeLoanType(solicitude, loanType))
+            StepVerifier.create(SolicitudeUtils.verifySolicitudeLoanType(solicitude))
                     .expectError(LoanTypeValueErrorException.class)
                     .verify();
         }
@@ -206,8 +211,9 @@ class SolicitudeUtilsTest {
         void shouldFailWhenLoanTypeMaxValueIsNegative() {
             Solicitude solicitude = createSolicitudeWithValue("10000.00");
             LoanType loanType = createValidLoanType().toBuilder().maxValue(new BigDecimal("-100")).build();
+            solicitude = solicitude.toBuilder().loanType(loanType).build();
 
-            StepVerifier.create(SolicitudeUtils.verifySolicitudeLoanType(solicitude, loanType))
+            StepVerifier.create(SolicitudeUtils.verifySolicitudeLoanType(solicitude))
                     .expectError(LoanTypeValueErrorException.class)
                     .verify();
         }

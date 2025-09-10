@@ -91,7 +91,7 @@ class SolicitudeEntityRepositoryImplTest {
         assertThat(usedSql).contains("SELECT").contains("FROM solicitud s").contains("LIMIT :limit OFFSET :offset");
 
         verify(executeSpec, atLeastOnce()).bind("limit", 20);
-        verify(executeSpec, atLeastOnce()).bind("offset", 20L);
+        verify(executeSpec, atLeastOnce()).bind("offset", 20);
 
         verify(logger, times(2)).debug(anyString(), any());
     }

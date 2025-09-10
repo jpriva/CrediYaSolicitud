@@ -17,7 +17,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
-import static co.com.pragma.api.constants.Constants.API_SOLICITUDE_PATH;
+import static co.com.pragma.api.constants.ApiConstants.ApiPath;
 
 @ContextConfiguration(classes = {SolicitudeRouterRest.class, SolicitudeHandler.class})
 @WebFluxTest
@@ -51,7 +51,7 @@ class ConfigTest {
     @Test
     void corsConfigurationShouldAllowOrigins() {
         webTestClient.post()
-                .uri(API_SOLICITUDE_PATH)
+                .uri(ApiPath.SOLICITUDE_PATH)
                 .exchange()
                 .expectStatus().isForbidden()/*
                 .expectHeader().valueEquals("Content-Security-Policy",

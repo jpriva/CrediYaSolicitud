@@ -1,0 +1,5 @@
+# Configuration for local development using LocalStack
+adapters:
+  sqs:
+    queueUrl: "http://localhost:4566/000000000000/solicitude-approved-queue"
+    endpoint: "http://localhost:4566"

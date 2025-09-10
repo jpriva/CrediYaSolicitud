@@ -1,0 +1,4 @@
+# Configuration for functional testing against a real AWS account
+adapters:
+  sqs:
+    queueUrl: "https://sqs.us-east-1.amazonaws.com/096187159240/solicitude-approved-queue"

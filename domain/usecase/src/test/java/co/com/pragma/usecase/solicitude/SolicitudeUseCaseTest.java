@@ -11,9 +11,11 @@ import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.model.solicitude.Solicitude;
 import co.com.pragma.model.solicitude.exceptions.SolicitudeNullException;
 import co.com.pragma.model.solicitude.gateways.SolicitudeRepository;
+import co.com.pragma.model.sqs.gateways.SQSPort;
 import co.com.pragma.model.state.State;
 import co.com.pragma.model.state.exceptions.StateNotFoundException;
 import co.com.pragma.model.state.gateways.StateRepository;
+import co.com.pragma.model.template.gateways.TemplatePort;
 import co.com.pragma.model.transaction.gateways.TransactionalPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -26,13 +28,10 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SolicitudeUseCaseTest {
@@ -47,13 +46,18 @@ class SolicitudeUseCaseTest {
     private LoggerPort logger;
     @Mock
     private TransactionalPort transactionalPort;
+    @Mock
+    private SQSPort sqsPort;
+    @Mock
+    private TemplatePort templatePort;
 
     @InjectMocks
     private SolicitudeUseCase solicitudeUseCase;
 
     private Solicitude testSolicitude;
     private LoanType testLoanType;
-    private State testState;
+    private State pendingState;
+    private State approvedState;
     private JwtData testJwtData;
 
     @BeforeEach
@@ -66,9 +70,14 @@ class SolicitudeUseCaseTest {
                 .maxValue(new BigDecimal("20000.00"))
                 .build();
 
-        testState = State.builder()
+        pendingState = State.builder()
                 .stateId(1)
                 .name(DefaultValues.PENDING_STATE)
+                .build();
+
+        approvedState = State.builder()
+                .stateId(2)
+                .name(DefaultValues.APPROVED_STATE)
                 .build();
 
         testSolicitude = Solicitude.builder()
@@ -84,7 +93,7 @@ class SolicitudeUseCaseTest {
     void shouldSaveSolicitudeSuccessfully() {
 
         when(loanTypeRepository.findById(anyInt())).thenReturn(Mono.just(testLoanType));
-        when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(testState));
+        when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(pendingState));
         when(solicitudeRepository.save(any(Solicitude.class))).thenAnswer(invocation -> {
             Solicitude input = invocation.getArgument(0);
             return Mono.just(input.toBuilder().solicitudeId(100).build());
@@ -117,7 +126,7 @@ class SolicitudeUseCaseTest {
     @Test
     void shouldFailWhenLoanTypeIsNotFound() {
         when(loanTypeRepository.findById(anyInt())).thenReturn(Mono.empty());
-        when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(testState));
+        when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(pendingState));
 
         StepVerifier.create(solicitudeUseCase.saveSolicitude(testSolicitude, "12345", testJwtData))
                 .expectError(LoanTypeNotFoundException.class)
@@ -141,7 +150,7 @@ class SolicitudeUseCaseTest {
                 .build();
 
         when(loanTypeRepository.findById(anyInt())).thenReturn(Mono.just(testLoanType));
-        when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(testState));
+        when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(pendingState));
 
         StepVerifier.create(solicitudeUseCase.saveSolicitude(invalidSolicitude, "12345", testJwtData))
                 .expectError(ValueOutOfBoundsException.class)
@@ -155,7 +164,7 @@ class SolicitudeUseCaseTest {
                 .build();
 
         when(loanTypeRepository.findById(anyInt())).thenReturn(Mono.just(testLoanType));
-        when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(testState));
+        when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(pendingState));
 
         StepVerifier.create(solicitudeUseCase.saveSolicitude(invalidSolicitude, "12345", testJwtData))
                 .expectError(ValueOutOfBoundsException.class)
@@ -167,7 +176,7 @@ class SolicitudeUseCaseTest {
         RuntimeException dbException = new RuntimeException("Database connection failed");
 
         when(loanTypeRepository.findById(anyInt())).thenReturn(Mono.just(testLoanType));
-        when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(testState));
+        when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(pendingState));
         when(solicitudeRepository.save(any(Solicitude.class))).thenReturn(Mono.error(dbException));
 
         StepVerifier.create(solicitudeUseCase.saveSolicitude(testSolicitude, "12345", testJwtData))
@@ -188,40 +197,84 @@ class SolicitudeUseCaseTest {
     }
 
     @Nested
-    class ApproveSolicitudeTests {
+    class ApproveRejectSolicitudeStateTests {
 
-        @Test
-        void shouldApproveSolicitudeSuccessfully() {
-            Integer solicitudeId = 1;
-            Solicitude existingSolicitude = testSolicitude.toBuilder().solicitudeId(solicitudeId).build();
-
-            when(solicitudeRepository.findById(solicitudeId)).thenReturn(Mono.just(existingSolicitude));
-            when(solicitudeRepository.save(any(Solicitude.class))).thenAnswer(invocation -> {
-                Solicitude toSave = invocation.getArgument(0);
-                assertThat(toSave.getState().getName()).isEqualTo(DefaultValues.APPROVED_STATE);
-                return Mono.just(toSave);
-            });
-
-            Mono<Solicitude> result = solicitudeUseCase.approveSolicitude(solicitudeId);
-
-            StepVerifier.create(result)
-                    .expectNextMatches(approved ->
-                            Objects.equals(approved.getState().getName(), DefaultValues.APPROVED_STATE) &&
-                                    approved.getSolicitudeId().equals(solicitudeId)
-                    )
-                    .verifyComplete();
+        @BeforeEach
+        void nestedSetUp() {
+            // Set up the test solicitude with a pending state for these tests
+            testSolicitude = testSolicitude.toBuilder()
+                    .solicitudeId(1)
+                    .email("test@example.com")
+                    .state(pendingState)
+                    .build();
         }
 
         @Test
-        void shouldFailToApproveWhenSolicitudeIsNotFound() {
-            Integer nonExistentId = 99;
-            when(solicitudeRepository.findById(nonExistentId)).thenReturn(Mono.empty());
+        void approveRejectSolicitudeState_happyPath() {
+            // Arrange
+            Solicitude updatedSolicitude = testSolicitude.toBuilder().state(approvedState).build();
 
-            Mono<Solicitude> result = solicitudeUseCase.approveSolicitude(nonExistentId);
+            when(stateRepository.findByName("APROBADO")).thenReturn(Mono.just(approvedState));
+            when(solicitudeRepository.findById(1)).thenReturn(Mono.just(testSolicitude));
+            when(loanTypeRepository.findById(any())).thenReturn(Mono.just(testLoanType));
+            when(stateRepository.findOne(any())).thenReturn(Mono.just(pendingState));
+            when(solicitudeRepository.save(any(Solicitude.class))).thenReturn(Mono.just(updatedSolicitude));
+            when(templatePort.process(any(), any())).thenReturn("<html>Email Body</html>");
 
+            // Act
+            Mono<Solicitude> result = solicitudeUseCase.approveRejectSolicitudeState(1, "APROBADO");
+
+            StepVerifier.create(result)
+                    .expectNextMatches(solicitude -> solicitude.getState().getName().equals("APROBADO"))
+                    .verifyComplete();
+            verify(solicitudeRepository).save(any(Solicitude.class));
+            verify(templatePort).process(any(), any());
+            verify(sqsPort).sendEmail(anyString(), anyString(), anyString());
+        }
+        @Test
+        void approveRejectSolicitudeState_invalidState() {
+
+            // Act
+            Mono<Solicitude> result = solicitudeUseCase.approveRejectSolicitudeState(1, "INVALID_STATE");
+
+            // Assert
+            StepVerifier.create(result)
+                    .expectError(InvalidFieldException.class)
+                    .verify();
+
+            verify(solicitudeRepository, never()).findById(anyInt());
+            verify(sqsPort, never()).sendEmail(any(), any(), any());
+        }
+
+        @Test
+        void approveRejectSolicitudeState_solicitudeNotFound() {
+            // Arrange
+            when(stateRepository.findByName("APROBADO")).thenReturn(Mono.just(approvedState));
+            when(solicitudeRepository.findById(999)).thenReturn(Mono.empty());
+
+            // Act
+            Mono<Solicitude> result = solicitudeUseCase.approveRejectSolicitudeState(999, "APROBADO");
+
+            // Assert
             StepVerifier.create(result)
                     .expectError(SolicitudeNullException.class)
                     .verify();
+
+            verify(solicitudeRepository, never()).save(any());
+            verify(sqsPort, never()).sendEmail(any(), any(), any());
+        }
+
+        @Test
+        void approveRejectSolicitudeState_sameState() {
+            // Act
+            Mono<Solicitude> result = solicitudeUseCase.approveRejectSolicitudeState(1, "PENDIENTE");
+
+            StepVerifier.create(result)
+                    .expectError(InvalidFieldException.class)
+                    .verify();
+
+            verify(solicitudeRepository, never()).save(any());
+            verify(sqsPort, never()).sendEmail(any(), any(), any());
         }
     }
 }

@@ -1,15 +1,13 @@
 package co.com.pragma.usecase.solicitude.utils;
 
 import co.com.pragma.model.constants.DefaultValues;
-import co.com.pragma.model.exceptions.InvalidCredentialsException;
+import co.com.pragma.model.exceptions.*;
 import co.com.pragma.model.jwt.JwtData;
 import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.exceptions.LoanTypeValueErrorException;
 import co.com.pragma.model.solicitude.Solicitude;
-import co.com.pragma.model.exceptions.FieldBlankException;
-import co.com.pragma.model.exceptions.FieldSizeOutOfBounds;
-import co.com.pragma.model.exceptions.InvalidFieldException;
-import co.com.pragma.model.exceptions.ValueOutOfBoundsException;
+import co.com.pragma.model.solicitude.exceptions.SolicitudeNullException;
+import co.com.pragma.model.state.exceptions.StateNotFoundException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -60,7 +58,8 @@ public class SolicitudeUtils {
                         () -> new FieldSizeOutOfBounds(DefaultValues.EMAIL_FIELD)));
     }
 
-    public static Mono<Solicitude> verifySolicitudeLoanType(Solicitude solicitude, LoanType loanType) {
+    public static Mono<Solicitude> verifySolicitudeLoanType(Solicitude solicitude) {
+        LoanType loanType = solicitude.getLoanType();
         return validateCondition(loanType.getMinValue() != null &&
                         loanType.getMinValue().compareTo(BigDecimal.ZERO) >= 0 &&
                         loanType.getMaxValue() != null &&
@@ -89,5 +88,14 @@ public class SolicitudeUtils {
                     .thenReturn(solicitude.toBuilder().email(token.subject()).build());
         }
         return Mono.error(new InvalidCredentialsException());
+    }
+
+    public static Mono<Void> validateApproveRejectRequestedData(Integer solicitudeId, String state){
+        if (solicitudeId == null) return Mono.error(new SolicitudeNullException());
+        if (state == null) return Mono.error(new StateNotFoundException());
+        if (!state.equals(DefaultValues.APPROVED_STATE) &&
+                !state.equals(DefaultValues.REJECTED_STATE))
+            return Mono.error(new InvalidFieldException(DefaultValues.STATE_FIELD));
+        return Mono.empty();
     }
 }

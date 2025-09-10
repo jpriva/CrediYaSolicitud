@@ -1,0 +1,6 @@
+dependencies {
+    implementation project(':model')
+    implementation 'org.springframework:spring-context'
+
+    implementation 'com.github.spullara.mustache.java:compiler:0.9.14'
+}

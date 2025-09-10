@@ -8,6 +8,7 @@ import co.com.pragma.api.dto.reports.SolicitudeReportResponseDTO;
 import co.com.pragma.api.dto.solicitude.SolicitudeRequestDTO;
 import co.com.pragma.api.dto.solicitude.SolicitudeResponseDTO;
 import co.com.pragma.api.exception.handler.CustomAccessDeniedHandler;
+import co.com.pragma.api.exception.handler.CustomAuthenticationEntryPoint;
 import co.com.pragma.api.exception.handler.GlobalExceptionHandler;
 import co.com.pragma.api.mapper.page.PageMapper;
 import co.com.pragma.api.mapper.report.SolicitudeReportMapper;
@@ -50,7 +51,7 @@ import static org.mockito.Mockito.when;
         ReportsDocumentation.class, // This class provides the GET /reporte route
         SolicitudeHandler.class,
         GlobalExceptionHandler.class, WebSecurityConfig.class,
-        CustomAccessDeniedHandler.class
+        CustomAccessDeniedHandler.class, CustomAuthenticationEntryPoint.class
 })
 @WebFluxTest
 class RouterRestTest {

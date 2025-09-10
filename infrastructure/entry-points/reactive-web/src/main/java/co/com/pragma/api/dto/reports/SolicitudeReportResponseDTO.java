@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = ApiConstants.Report.REPORT_RES_SCHEMA_NAME, description = ApiConstants.Report.REPORT_RES_SCHEMA_DESC)
+@Schema(name = ApiConstants.Report.REPORT_RES_SCHEMA_NAME, description = ApiConstants.Report.REPORT_RES_SCHEMA_DESC, hidden = true)
 public class SolicitudeReportResponseDTO {
     @Schema(description = ApiConstants.Report.REPORT_RES_SOLICITUDE_ID_DESC, example = ApiConstants.Report.EXAMPLE_RES_SOLICITUDE_ID)
     private Integer solicitudeId;

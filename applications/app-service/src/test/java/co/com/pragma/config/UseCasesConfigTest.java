@@ -3,7 +3,9 @@ package co.com.pragma.config;
 import co.com.pragma.model.loantype.gateways.LoanTypeRepository;
 import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.model.solicitude.gateways.SolicitudeRepository;
+import co.com.pragma.model.sqs.gateways.SQSPort;
 import co.com.pragma.model.state.gateways.StateRepository;
+import co.com.pragma.model.template.gateways.TemplatePort;
 import co.com.pragma.model.transaction.gateways.TransactionalPort;
 import co.com.pragma.model.user.gateways.UserPort;
 import org.junit.jupiter.api.Test;
@@ -65,6 +67,16 @@ class UseCasesConfigTest {
         @Bean
         public TransactionalPort transactionalPort() {
             return Mockito.mock(TransactionalPort.class);
+        }
+
+        @Bean
+        public SQSPort sqsPort(){
+            return Mockito.mock(SQSPort.class);
+        }
+
+        @Bean
+        public TemplatePort templatePort(){
+            return Mockito.mock(TemplatePort.class);
         }
     }
 }
