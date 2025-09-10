@@ -22,9 +22,13 @@ public class SQSSenderConfig {
                 .region(Region.of(properties.region()))
                 .overrideConfiguration(o -> o.addMetricPublisher(publisher));
         if (properties.endpoint() != null && !properties.endpoint().isEmpty()) {
-            builder.credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test")));
+            AwsBasicCredentials credentials = AwsBasicCredentials.builder()
+                    .accessKeyId("test")
+                    .secretAccessKey("test")
+                    .build();
+            builder.credentialsProvider(StaticCredentialsProvider.create(credentials));
         } else {
-            builder.credentialsProvider(getProviderChain());
+            builder.credentialsProvider(DefaultCredentialsProvider.builder().build());
         }
         return builder.build();
     }
@@ -41,7 +45,7 @@ public class SQSSenderConfig {
     }
 
     private URI resolveEndpoint(SQSSenderProperties properties) {
-        if (properties.endpoint() != null) {
+        if (properties.endpoint() != null && !properties.endpoint().isEmpty()) {
             return URI.create(properties.endpoint());
         }
         return null;
