@@ -1,16 +1,22 @@
 package co.com.pragma.sqs.sender;
 
+import co.com.pragma.model.sqs.DebtCapacity;
+import co.com.pragma.model.sqs.exceptions.QueueAliasEmptyException;
+import co.com.pragma.model.sqs.exceptions.QueueNotFoundException;
+import co.com.pragma.sqs.sender.config.QueueAlias;
 import co.com.pragma.sqs.sender.config.SQSSenderProperties;
+import co.com.pragma.sqs.sender.dto.DebtCapacitySqsMessage;
 import co.com.pragma.sqs.sender.dto.EmailSqsMessage;
+import co.com.pragma.sqs.sender.mapper.DebtCapacityMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -19,12 +25,11 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,90 +42,160 @@ class SQSSenderTest {
     private SqsAsyncClient client;
     @Mock
     private ObjectMapper objectMapper;
+    @Mock
+    private DebtCapacityMapper debtCapacityMapper;
 
     @InjectMocks
-    @Spy // Usamos Spy para poder mockear el método 'send' dentro de la misma clase
-    private SQSSender sqsSender;
+    private SQSSender sender;
 
-    @Captor
-    private ArgumentCaptor<String> messageCaptor;
+    @Nested
+    @DisplayName("Generic Send Method Tests")
+    class SendMethodTests {
+        @Test
+        @DisplayName("Should send message and return messageId on success")
+        void send_shouldSendMessageAndReturnMessageId() {
+            // Arrange
+            String queueAlias = "test-queue";
+            String queueUrl = "http://test.queue.url";
+            String testMessage = "{\"test\":\"message\"}";
+            String expectedMessageId = "id-12345";
 
-    @Test
-    void sendEmail_shouldSerializePayloadAndCallSend() throws JsonProcessingException {
-        // Arrange
-        String email = "test@example.com";
-        String title = "Test Title";
-        String message = "Test Message";
-        String expectedJson = "{\"to\":\"test@example.com\",\"subject\":\"Test Title\",\"body\":\"Test Message\"}";
 
-        when(objectMapper.writeValueAsString(any(EmailSqsMessage.class))).thenReturn(expectedJson);
-        // Mockeamos la llamada al método 'send' para aislar la prueba a 'sendEmail'
-        doReturn(Mono.just("dummy-message-id")).when(sqsSender).send(any());
+            when(properties.queues()).thenReturn(Map.of(queueAlias, queueUrl));
 
-        // Act
-        sqsSender.sendEmail(email, title, message);
+            SendMessageResponse response = SendMessageResponse.builder().messageId(expectedMessageId).build();
+            CompletableFuture<SendMessageResponse> futureResponse = CompletableFuture.completedFuture(response);
+            when(client.sendMessage(any(SendMessageRequest.class))).thenReturn(futureResponse);
 
-        // Assert
-        verify(objectMapper).writeValueAsString(any(EmailSqsMessage.class));
-        verify(sqsSender).send(messageCaptor.capture());
-        assertEquals(expectedJson, messageCaptor.getValue());
+            // Act
+            Mono<String> result = sender.send(queueAlias, testMessage);
+
+            // Assert
+            StepVerifier.create(result)
+                    .expectNext(expectedMessageId)
+                    .verifyComplete();
+
+            ArgumentCaptor<SendMessageRequest> requestCaptor = ArgumentCaptor.forClass(SendMessageRequest.class);
+            verify(client).sendMessage(requestCaptor.capture());
+            assertEquals(queueUrl, requestCaptor.getValue().queueUrl());
+            assertEquals(testMessage, requestCaptor.getValue().messageBody());
+        }
+
+        @Test
+        @DisplayName("Should return error on SQS client failure")
+        void send_shouldReturnErrorOnSqsFailure() {
+            // Arrange
+            String queueAlias = "test-queue";
+            String queueUrl = "http://test.queue.url";
+            when(properties.queues()).thenReturn(Map.of(queueAlias, queueUrl));
+
+            CompletableFuture<SendMessageResponse> futureResponse = CompletableFuture.failedFuture(SdkClientException.create("SQS is down"));
+            when(client.sendMessage(any(SendMessageRequest.class))).thenReturn(futureResponse);
+
+            // Act
+            Mono<String> result = sender.send(queueAlias, "message");
+
+            // Assert
+            StepVerifier.create(result)
+                    .expectError(SdkClientException.class)
+                    .verify();
+        }
+
+        @Test
+        @DisplayName("Should return error when queue alias is null")
+        void send_shouldReturnErrorWhenAliasIsNull() {
+            // Act
+            Mono<String> result = sender.send(null, "message");
+
+            // Assert
+            StepVerifier.create(result)
+                    .expectError(QueueAliasEmptyException.class)
+                    //.expectErrorMessage("Queue alias cannot be null or empty")
+                    .verify();
+        }
+
+        @Test
+        @DisplayName("Should return error when queue alias is not found")
+        void send_shouldReturnErrorWhenAliasIsNotFound() {
+            // Arrange
+            when(properties.queues()).thenReturn(Map.of("known-alias", "some-url"));
+
+            // Act
+            Mono<String> result = sender.send("unknown-alias", "message");
+
+            // Assert
+            StepVerifier.create(result)
+                    .expectError(QueueNotFoundException.class)
+                    //.expectErrorMessage("Queue alias not found in configuration: unknown-alias")
+                    .verify();
+        }
     }
 
-    @Test
-    void sendEmail_shouldHandleSerializationError() throws JsonProcessingException {
-        // Arrange
-        when(objectMapper.writeValueAsString(any(EmailSqsMessage.class))).thenThrow(new JsonProcessingException("Serialization failed") {});
+    @Nested
+    @DisplayName("Wrapper Method Tests")
+    class WrapperMethodTests {
 
-        // Act
-        sqsSender.sendEmail("test@example.com", "title", "message");
+        @Test
+        @DisplayName("sendEmail should serialize and send message successfully")
+        void sendEmail_shouldSerializeAndSendMessage() throws JsonProcessingException {
+            // Arrange
+            String email = "test@example.com";
+            String title = "Test Title";
+            String message = "Test Message";
+            String expectedJson = "{\"to\":\"test@example.com\",\"subject\":\"Test Title\",\"body\":\"Test Message\"}";
 
-        // Assert
-        // Verificamos que el método 'send' nunca fue llamado si la serialización falla
-        verify(sqsSender, never()).send(any());
-    }
+            when(objectMapper.writeValueAsString(any(EmailSqsMessage.class))).thenReturn(expectedJson);
+            when(properties.queues()).thenReturn(Map.of(QueueAlias.NOTIFY_STATE_CHANGE, "some-url"));
+            SendMessageResponse mockResponse = SendMessageResponse.builder().messageId("dummy-id").build();
+            when(client.sendMessage(any(SendMessageRequest.class))).thenReturn(CompletableFuture.completedFuture(mockResponse));
 
-    @Test
-    void send_shouldSendMessageAndReturnMessageId() {
-        // Arrange
-        String testMessage = "{\"test\":\"message\"}";
-        String queueUrl = "http://test.queue.url";
-        String expectedMessageId = "id-12345";
+            // Act
+            Mono<Void> result = sender.sendEmail(email, title, message);
 
-        when(properties.queueUrl()).thenReturn(queueUrl);
+            // Assert
+            StepVerifier.create(result).verifyComplete();
 
-        SendMessageResponse response = SendMessageResponse.builder().messageId(expectedMessageId).build();
-        CompletableFuture<SendMessageResponse> futureResponse = CompletableFuture.completedFuture(response);
-        when(client.sendMessage(any(SendMessageRequest.class))).thenReturn(futureResponse);
+            ArgumentCaptor<SendMessageRequest> requestCaptor = ArgumentCaptor.forClass(SendMessageRequest.class);
+            verify(client).sendMessage(requestCaptor.capture());
+            assertEquals(expectedJson, requestCaptor.getValue().messageBody());
+        }
 
-        // Act
-        Mono<String> result = sqsSender.send(testMessage);
+        @Test
+        @DisplayName("sendEmail should return error on serialization failure")
+        void sendEmail_shouldReturnErrorOnSerializationFailure() throws JsonProcessingException {
+            // Arrange
+            when(objectMapper.writeValueAsString(any(EmailSqsMessage.class))).thenThrow(new JsonProcessingException("Serialization failed") {
+            });
 
-        // Assert
-        StepVerifier.create(result)
-                .expectNext(expectedMessageId)
-                .verifyComplete();
+            // Act
+            Mono<Void> result = sender.sendEmail("test@example.com", "title", "message");
 
-        ArgumentCaptor<SendMessageRequest> requestCaptor = ArgumentCaptor.forClass(SendMessageRequest.class);
-        verify(client).sendMessage(requestCaptor.capture());
-        assertEquals(queueUrl, requestCaptor.getValue().queueUrl());
-        assertEquals(testMessage, requestCaptor.getValue().messageBody());
-    }
+            // Assert
+            StepVerifier.create(result)
+                    .expectError(JsonProcessingException.class)
+                    .verify();
+        }
 
-    @Test
-    void send_shouldReturnErrorOnSqsFailure() {
-        // Arrange
-        String testMessage = "{\"test\":\"message\"}";
-        when(properties.queueUrl()).thenReturn("http://test.queue.url");
+        @Test
+        @DisplayName("sendDebtCapacity should call mapper and send message")
+        void sendDebtCapacity_shouldCallMapperAndSendMessage() throws JsonProcessingException {
+            // Arrange
+            DebtCapacity debtCapacity = DebtCapacity.builder().solicitudeId(1).build();
+            String expectedJson = "{\"solicitudeId\":1}";
 
-        CompletableFuture<SendMessageResponse> futureResponse = CompletableFuture.failedFuture(SdkClientException.create("SQS is down"));
-        when(client.sendMessage(any(SendMessageRequest.class))).thenReturn(futureResponse);
+            when(debtCapacityMapper.toSqsMessage(debtCapacity)).thenReturn(DebtCapacitySqsMessage.builder().solicitudeId(1).build());
+            when(objectMapper.writeValueAsString(any())).thenReturn(expectedJson);
+            when(properties.queues()).thenReturn(Map.of(QueueAlias.CALCULATE_DEBT_CAPACITY, "some-url"));
+            SendMessageResponse mockResponse = SendMessageResponse.builder().messageId("dummy-id").build();
+            when(client.sendMessage(any(SendMessageRequest.class))).thenReturn(CompletableFuture.completedFuture(mockResponse));
 
-        // Act
-        Mono<String> result = sqsSender.send(testMessage);
+            // Act
+            Mono<Void> result = sender.sendDebtCapacity(debtCapacity);
 
-        // Assert
-        StepVerifier.create(result)
-                .expectError(SdkClientException.class)
-                .verify();
+            // Assert
+            StepVerifier.create(result).verifyComplete();
+            verify(debtCapacityMapper).toSqsMessage(debtCapacity);
+            verify(client).sendMessage(any(SendMessageRequest.class));
+        }
     }
 }

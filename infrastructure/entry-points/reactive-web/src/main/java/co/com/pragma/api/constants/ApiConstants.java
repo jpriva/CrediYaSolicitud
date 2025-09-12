@@ -10,11 +10,17 @@ public class ApiConstants {
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static final class ApiPath {
         public static final String BASE_PATH = "/api/v1";
+        //Loan type
         public static final String LOAN_TYPE_PATH = BASE_PATH + "/tipoprestamo";
+        //State
         public static final String STATE_PATH = BASE_PATH + "/estado";
+        //Loan application
         public static final String SOLICITUDE_PATH = BASE_PATH + "/solicitud";
+        //Update State
         public static final String SOLICITUDE_UPDATE_PATH = SOLICITUDE_PATH + "/{id}";
-        public static final String API_REPORT_PATH = BASE_PATH + "/report";
+        //Calculate Debt capacity
+        public static final String DEBT_CAPACITY_PATH = BASE_PATH + "/calcular-capacidad";
+        //***********************
         public static final String SWAGGER_PATH = "/swagger-ui.html";
         public static final String DUMMY_SOLICITUDE_DOC_ROUTE = "/dummy-solicitude-doc-route";
         public static final String DUMMY_REPORT_DOC_ROUTE = "/dummy-report-doc-route";
@@ -27,10 +33,7 @@ public class ApiConstants {
         public static final String STATE_MATCHER = ApiPath.STATE_PATH + "/**";
         public static final String API_DOCS_MATCHER = "/v3/api-docs/**";
         public static final String SWAGGER_UI_MATCHER = "/swagger-ui/**";
-        //CLIENTE
         public static final String SOLICITUDE_MATCHER = ApiPath.SOLICITUDE_PATH + "/**";
-        //ASESOR
-        public static final String REPORT_MATCHER = ApiPath.API_REPORT_PATH + "/**";
         //ADMIN
         //TEST ENDPOINT
         public static final String TEST_MATCHER = "/test-endpoint";
@@ -191,11 +194,16 @@ public class ApiConstants {
         public static final String RES_401_DESC = "Unauthorized. A valid token is required.";
         public static final String RES_500_DESC = "Internal server error.";
 
-        // --- Request Schema ---
+        // --- Request Schema Status ---
         public static final String UPDATE_STATE_DESC = "The new state for the solicitude.";
         public static final String EXAMPLE_UPDATE_STATE = "APROBADO";
         public static final String APPROVED_STATE = "APROBADO";
         public static final String REJECTED_STATE = "RECHAZADO";
+        public static final String MANUAL_STATE = "MANUAL";
+
+        // --- Request Schema IdLoanApplication ---
+        public static final String ID_SOLICITUDE_DESC = "The id of the Loan Application for status update.";
+        public static final String EXAMPLE_ID_SOLICITUDE = "8";
     }
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static final class ApiOperations {
@@ -245,8 +253,6 @@ public class ApiConstants {
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static final class SolicitudeDocs {
-        public static final String UPDATE_SOLICITUDE_STATUS_SUMMARY = "Update the status of a loan application for advisor's role only";
-        public static final String UPDATE_SOLICITUDE_STATUS_DESCRIPTION = "Updates the status of a specific loan application to 'APROBADO' or 'RECHAZADO'.";
         public static final String UPDATE_SOLICITUDE_STATUS_BODY_DESC = "The new status for the application.";
 
 

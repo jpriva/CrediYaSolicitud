@@ -7,7 +7,9 @@ import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.exceptions.LoanTypeValueErrorException;
 import co.com.pragma.model.solicitude.Solicitude;
 import co.com.pragma.model.solicitude.exceptions.SolicitudeNullException;
+import co.com.pragma.model.sqs.DebtCapacity;
 import co.com.pragma.model.state.exceptions.StateNotFoundException;
+import co.com.pragma.model.user.UserProjection;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -97,5 +99,15 @@ public class SolicitudeUtils {
                 !state.equals(DefaultValues.REJECTED_STATE))
             return Mono.error(new InvalidFieldException(DefaultValues.STATE_FIELD));
         return Mono.empty();
+    }
+
+    public static DebtCapacity buildDebtCapacity(UserProjection user,Solicitude solicitude,BigDecimal totalFee){
+        return DebtCapacity.builder()
+                .solicitudeId(solicitude.getSolicitudeId())
+                .baseSalary(user.getBaseSalary())
+                .value(solicitude.getValue())
+                .interestRate(solicitude.getLoanType().getInterestRate())
+                .currentTotalMonthlyFee(totalFee)
+                .build();
     }
 }

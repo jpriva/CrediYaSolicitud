@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+
 @Repository
 @RequiredArgsConstructor
 public class SolicitudeEntityRepositoryAdapter implements SolicitudeRepository {
@@ -28,6 +30,11 @@ public class SolicitudeEntityRepositoryAdapter implements SolicitudeRepository {
     @Override
     public Flux<SolicitudeReport> findSolicitudeReport(SolicitudeReportFilter filter) {
         return solicitudeRepository.findSolicitudeReport(filter);
+    }
+
+    @Override
+    public Mono<BigDecimal> findTotalMonthlyFee(String email) {
+        return solicitudeRepository.findTotalMonthlyFee(email);
     }
 
     @Override

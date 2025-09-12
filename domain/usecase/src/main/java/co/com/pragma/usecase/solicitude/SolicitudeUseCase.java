@@ -4,6 +4,7 @@ import co.com.pragma.model.constants.DefaultValues;
 import co.com.pragma.model.constants.Errors;
 import co.com.pragma.model.constants.LogMessages;
 import co.com.pragma.model.exceptions.InvalidFieldException;
+import co.com.pragma.model.exceptions.UserNotFoundException;
 import co.com.pragma.model.jwt.JwtData;
 import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.exceptions.LoanTypeNotFoundException;
@@ -19,12 +20,12 @@ import co.com.pragma.model.state.gateways.StateRepository;
 import co.com.pragma.model.template.EmailTemplate;
 import co.com.pragma.model.template.gateways.TemplatePort;
 import co.com.pragma.model.transaction.gateways.TransactionalPort;
+import co.com.pragma.model.user.UserProjection;
+import co.com.pragma.model.user.gateways.UserPort;
 import co.com.pragma.usecase.solicitude.utils.NotificationUtils;
 import co.com.pragma.usecase.solicitude.utils.SolicitudeUtils;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
-
-import java.util.Map;
 
 @RequiredArgsConstructor
 public class SolicitudeUseCase {
@@ -36,6 +37,7 @@ public class SolicitudeUseCase {
     private final TransactionalPort transactionalPort;
     private final SQSPort sqsPort;
     private final TemplatePort templatePort;
+    private final UserPort userPort;
 
     public Mono<Solicitude> saveSolicitude(Solicitude solicitude, String idNumber, JwtData token) {
         return Mono.justOrEmpty(solicitude)
@@ -48,28 +50,38 @@ public class SolicitudeUseCase {
                 .flatMap(this::saveNewSolicitudeTransaction)
                 .doFirst(() -> logger.info(LogMessages.START_SAVING_SOLICITUDE_PROCESS + " for user with idNumber: {}", idNumber))
                 .doOnError(ex -> logger.error(Errors.ERROR_SAVING_SOLICITUDE + " for user with idNumber: {}", idNumber, ex))
-                .doOnSuccess(savedSolicitude -> logger.info(LogMessages.SAVED_SOLICITUDE + " with ID: {}", savedSolicitude.getSolicitudeId()))
+                .flatMap(savedSolicitude ->
+                        postProcessSaveSolicitude(savedSolicitude)
+                                .onErrorResume(ex -> {
+                                    logger.error("Error calculating debt capacity for loan application with Id: {}", savedSolicitude.getSolicitudeId(), ex);
+                                    return Mono.empty();
+                                })
+                                .thenReturn(savedSolicitude)
+                )
                 .as(transactionalPort::transactional);
     }
 
     public Mono<Solicitude> approveRejectSolicitudeState(Integer solicitudeId, String state) {
         return SolicitudeUtils.validateApproveRejectRequestedData(solicitudeId, state)
-                .then(Mono.defer(()->{
+                .then(Mono.defer(() -> {
                     Mono<State> newState = stateRepository.findByName(state).switchIfEmpty(Mono.error(new StateNotFoundException()));
-                    Mono<Solicitude> solicitude= solicitudeRepository.findById(solicitudeId).switchIfEmpty(Mono.error(new SolicitudeNullException()));
+                    Mono<Solicitude> solicitude = solicitudeRepository.findById(solicitudeId).switchIfEmpty(Mono.error(new SolicitudeNullException()));
                     return Mono.zip(newState, solicitude);
                 }))
                 .flatMap(tStateSolicitude ->
                         saveStateChange(tStateSolicitude.getT1(), tStateSolicitude.getT2())
-                ).doOnSuccess(solicitude -> {
-                    Map<String,Object> context = NotificationUtils.solicitudeChangeStateBody(solicitude);
-                    String emailBody = templatePort.process(EmailTemplate.STATE_CHANGE, context);
-                    sqsPort.sendEmail(
-                            solicitude.getEmail(),
-                            NotificationUtils.DEFAULT_STATE_CHANGE,
-                            emailBody
-                    );
-                }).as(transactionalPort::transactional);
+                ).flatMap(solicitude ->
+                        Mono.fromCallable(() -> NotificationUtils.solicitudeChangeStateBody(solicitude))
+                                .flatMap(context -> templatePort.process(EmailTemplate.STATE_CHANGE, context))
+                                .flatMap(emailBody -> sqsPort.sendEmail(
+                                        solicitude.getEmail(),
+                                        NotificationUtils.DEFAULT_STATE_CHANGE,
+                                        emailBody
+                                )).onErrorResume(error -> {
+                                    logger.error("Failed to send state change notification for solicitude {}. Error will be ignored.", solicitude.getSolicitudeId(), error);
+                                    return Mono.empty();
+                                }).thenReturn(solicitude)
+                ).as(transactionalPort::transactional);
     }
 
     // START Private methods ***********************************************************
@@ -110,6 +122,30 @@ public class SolicitudeUseCase {
                         .state(tuple.getT2())
                         .build()
         );
+    }
+
+    private Mono<Void> postProcessSaveSolicitude(Solicitude savedSolicitude) {
+        if (savedSolicitude == null || savedSolicitude.getLoanType() == null || savedSolicitude.getEmail() == null) {
+            return Mono.empty();
+        }
+        boolean autoValidation = savedSolicitude.getLoanType().getAutoValidation();
+        if (!autoValidation) {
+            return Mono.empty();
+        }
+        logger.info(LogMessages.SAVED_SOLICITUDE + " with ID: {}", savedSolicitude.getSolicitudeId());
+        String email = savedSolicitude.getEmail();
+        return findUserByEmail(email)
+                .flatMap(user -> solicitudeRepository.findTotalMonthlyFee(email)
+                        .map(fee ->
+                                SolicitudeUtils.buildDebtCapacity(user, savedSolicitude, fee)
+                        )
+                )
+                .flatMap(sqsPort::sendDebtCapacity);
+    }
+
+    private Mono<UserProjection> findUserByEmail(String email) {
+        return userPort.getUserByEmail(email)
+                .switchIfEmpty(Mono.error(new UserNotFoundException(email)));
     }
 
     // END Private methods *************************************************************

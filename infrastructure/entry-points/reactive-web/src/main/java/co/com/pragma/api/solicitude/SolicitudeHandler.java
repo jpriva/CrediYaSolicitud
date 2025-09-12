@@ -84,4 +84,8 @@ public class SolicitudeHandler {
                                 .bodyValue(updatedSolicitude)
                 );
     }
+
+    public Mono<ServerResponse> listenPOSTDebtCapacityUseCase(ServerRequest serverRequest) {
+        return ServerResponse.ok().bodyValue("{}");
+    }
 }
