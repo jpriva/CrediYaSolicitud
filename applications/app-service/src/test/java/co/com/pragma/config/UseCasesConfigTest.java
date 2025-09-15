@@ -1,5 +1,6 @@
 package co.com.pragma.config;
 
+import co.com.pragma.model.jwt.gateways.JwtProviderPort;
 import co.com.pragma.model.loantype.gateways.LoanTypeRepository;
 import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.model.solicitude.gateways.SolicitudeRepository;
@@ -77,6 +78,11 @@ class UseCasesConfigTest {
         @Bean
         public TemplatePort templatePort(){
             return Mockito.mock(TemplatePort.class);
+        }
+
+        @Bean
+        public JwtProviderPort jwtPort(){
+            return Mockito.mock(JwtProviderPort.class);
         }
     }
 }

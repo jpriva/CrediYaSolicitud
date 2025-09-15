@@ -3,11 +3,13 @@ package co.com.pragma.sqs.sender;
 import co.com.pragma.model.sqs.DebtCapacity;
 import co.com.pragma.model.sqs.exceptions.QueueAliasEmptyException;
 import co.com.pragma.model.sqs.exceptions.QueueNotFoundException;
+import co.com.pragma.model.template.EmailMessage;
 import co.com.pragma.sqs.sender.config.QueueAlias;
 import co.com.pragma.sqs.sender.config.SQSSenderProperties;
 import co.com.pragma.sqs.sender.dto.DebtCapacitySqsMessage;
 import co.com.pragma.sqs.sender.dto.EmailSqsMessage;
 import co.com.pragma.sqs.sender.mapper.DebtCapacityMapper;
+import co.com.pragma.sqs.sender.mapper.EmailMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -44,6 +46,8 @@ class SQSSenderTest {
     private ObjectMapper objectMapper;
     @Mock
     private DebtCapacityMapper debtCapacityMapper;
+    @Mock
+    private EmailMapper emailMapper;
 
     @InjectMocks
     private SQSSender sender;
@@ -139,10 +143,11 @@ class SQSSenderTest {
         @DisplayName("sendEmail should serialize and send message successfully")
         void sendEmail_shouldSerializeAndSendMessage() throws JsonProcessingException {
             // Arrange
-            String email = "test@example.com";
-            String title = "Test Title";
-            String message = "Test Message";
+            EmailMessage message = EmailMessage.builder().to("test@example.com").subject("Test Title").body("Test Message").build();
+
             String expectedJson = "{\"to\":\"test@example.com\",\"subject\":\"Test Title\",\"body\":\"Test Message\"}";
+            EmailSqsMessage sqsMessage = EmailSqsMessage.builder().to("test@example.com").subject("Test Title").body("Test Message").build();
+            when(emailMapper.toSqsMessage(message)).thenReturn(sqsMessage);
 
             when(objectMapper.writeValueAsString(any(EmailSqsMessage.class))).thenReturn(expectedJson);
             when(properties.queues()).thenReturn(Map.of(QueueAlias.NOTIFY_STATE_CHANGE, "some-url"));
@@ -150,7 +155,7 @@ class SQSSenderTest {
             when(client.sendMessage(any(SendMessageRequest.class))).thenReturn(CompletableFuture.completedFuture(mockResponse));
 
             // Act
-            Mono<Void> result = sender.sendEmail(email, title, message);
+            Mono<Void> result = sender.sendEmail(message);
 
             // Assert
             StepVerifier.create(result).verifyComplete();
@@ -164,11 +169,14 @@ class SQSSenderTest {
         @DisplayName("sendEmail should return error on serialization failure")
         void sendEmail_shouldReturnErrorOnSerializationFailure() throws JsonProcessingException {
             // Arrange
+            EmailMessage message = EmailMessage.builder().to("test@example.com").subject("title").body("message").build();
+            when(emailMapper.toSqsMessage(message)).thenReturn(EmailSqsMessage.builder().build());
+
             when(objectMapper.writeValueAsString(any(EmailSqsMessage.class))).thenThrow(new JsonProcessingException("Serialization failed") {
             });
 
             // Act
-            Mono<Void> result = sender.sendEmail("test@example.com", "title", "message");
+            Mono<Void> result = sender.sendEmail(message);
 
             // Assert
             StepVerifier.create(result)

@@ -115,7 +115,6 @@ class SolicitudeUseCaseTest {
         });
         when(userPort.getUserByEmail(anyString())).thenReturn(Mono.just(mockUser));
         when(solicitudeRepository.findTotalMonthlyFee(anyString())).thenReturn(Mono.just(BigDecimal.ZERO));
-        when(sqsPort.sendDebtCapacity(any())).thenReturn(Mono.empty());
 
         StepVerifier.create(solicitudeUseCase.saveSolicitude(testSolicitude, "12345", testJwtData))
                 .expectNextMatches(result ->
