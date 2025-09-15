@@ -4,10 +4,11 @@ import co.com.pragma.model.sqs.DebtCapacity;
 import co.com.pragma.model.sqs.exceptions.QueueAliasEmptyException;
 import co.com.pragma.model.sqs.exceptions.QueueNotFoundException;
 import co.com.pragma.model.sqs.gateways.SQSPort;
+import co.com.pragma.model.template.EmailMessage;
 import co.com.pragma.sqs.sender.config.QueueAlias;
 import co.com.pragma.sqs.sender.config.SQSSenderProperties;
-import co.com.pragma.sqs.sender.dto.EmailSqsMessage;
 import co.com.pragma.sqs.sender.mapper.DebtCapacityMapper;
+import co.com.pragma.sqs.sender.mapper.EmailMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class SQSSender implements SQSPort {
     private final SqsAsyncClient client;
     private final ObjectMapper objectMapper;
     private final DebtCapacityMapper debtCapacityMapper;
+    private final EmailMapper emailMapper;
 
     public Mono<String> send(String queueAlias, String message) {
         return Mono.justOrEmpty(queueAlias)
@@ -46,13 +48,9 @@ public class SQSSender implements SQSPort {
     }
 
     @Override
-    public Mono<Void> sendEmail(String email, String title, String message) {
-        var payload = EmailSqsMessage.builder()
-                .to(email)
-                .subject(title)
-                .body(message)
-                .build();
-        return sendGenericMessage(QueueAlias.NOTIFY_STATE_CHANGE, payload, "email notification for " + email);
+    public Mono<Void> sendEmail(EmailMessage emailMessage) {
+        var payload = emailMapper.toSqsMessage(emailMessage);
+        return sendGenericMessage(QueueAlias.NOTIFY_STATE_CHANGE, payload, "email notification for " + emailMessage.getTo());
     }
 
     @Override

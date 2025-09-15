@@ -15,4 +15,6 @@ public class DebtCapacity {
     private BigDecimal value;
     private BigDecimal interestRate;
     private BigDecimal currentTotalMonthlyFee;
+    private Integer deadline;
+    private String token;
 }

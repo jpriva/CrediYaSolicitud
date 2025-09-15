@@ -34,6 +34,7 @@ public class ApiConstants {
         public static final String API_DOCS_MATCHER = "/v3/api-docs/**";
         public static final String SWAGGER_UI_MATCHER = "/swagger-ui/**";
         public static final String SOLICITUDE_MATCHER = ApiPath.SOLICITUDE_PATH + "/**";
+        public static final String DEBT_CAPACITY_MATCHER = ApiPath.DEBT_CAPACITY_PATH + "/**";
         //ADMIN
         //TEST ENDPOINT
         public static final String TEST_MATCHER = "/test-endpoint";
@@ -45,6 +46,7 @@ public class ApiConstants {
         public static final String CLIENT_ROLE_NAME = "CLIENTE";
         public static final String ADMIN_ROLE_NAME = "ADMIN";
         public static final String ADVISOR_ROLE_NAME = "ASESOR";
+        public static final String CALLBACK_ROLE = "CALLBACK_ROLE";
 
     }
 

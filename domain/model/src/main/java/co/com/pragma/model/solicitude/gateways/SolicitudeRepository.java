@@ -18,4 +18,6 @@ public interface SolicitudeRepository {
     Mono<Long> countSolicitudeReport(SolicitudeReportFilter filter);
 
     Mono<Solicitude> findById(Integer solicitudeId);
+
+    Flux<Solicitude> findByEmail(String email);
 }

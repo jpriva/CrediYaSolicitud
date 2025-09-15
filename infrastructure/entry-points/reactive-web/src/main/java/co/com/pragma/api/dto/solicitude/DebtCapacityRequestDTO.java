@@ -17,7 +17,7 @@ public class DebtCapacityRequestDTO {
             description = StateChangeDocs.ID_SOLICITUDE_DESC,
             example = StateChangeDocs.EXAMPLE_ID_SOLICITUDE
     )
-    private String idLoanApplication;
+    private Integer solicitudeId;
 
     @NotBlank
     @Schema(

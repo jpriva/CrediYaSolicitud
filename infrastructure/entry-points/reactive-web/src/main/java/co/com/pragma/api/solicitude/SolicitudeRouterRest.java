@@ -16,7 +16,7 @@ public class SolicitudeRouterRest {
                 .POST(ApiConstants.ApiPath.SOLICITUDE_PATH, handler::listenPOSTSaveSolicitudeUseCase)
                 .GET(ApiConstants.ApiPath.SOLICITUDE_PATH, handler::listenGETSolicitudeReportUseCase)
                 .PUT(ApiConstants.ApiPath.SOLICITUDE_UPDATE_PATH, handler::listenPUTUpdateSolicitudeStatusUseCase)
-                .PUT(ApiConstants.ApiPath.DEBT_CAPACITY_PATH, handler::listenPOSTDebtCapacityUseCase)
+                .POST(ApiConstants.ApiPath.DEBT_CAPACITY_PATH, handler::listenPOSTDebtCapacityUseCase)
                 .build();
     }
 }

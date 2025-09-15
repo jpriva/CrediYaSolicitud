@@ -46,4 +46,9 @@ public class SolicitudeEntityRepositoryAdapter implements SolicitudeRepository {
     public Mono<Solicitude> findById(Integer solicitudeId) {
         return solicitudeRepository.findById(solicitudeId).map(solicitudeMapper::toDomain);
     }
+
+    @Override
+    public Flux<Solicitude> findByEmail(String email) {
+        return solicitudeRepository.findByEmail(email).map(solicitudeMapper::toDomain);
+    }
 }

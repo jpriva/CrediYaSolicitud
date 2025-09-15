@@ -19,4 +19,6 @@ public class DebtCapacitySqsMessage {
     private BigDecimal interestRate;
     @JsonSerialize(using = MoneySerializer.class)
     private BigDecimal currentTotalMonthlyFee;
+    private Integer deadline;
+    private String token;
 }

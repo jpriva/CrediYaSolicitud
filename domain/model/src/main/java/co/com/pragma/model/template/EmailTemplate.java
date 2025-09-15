@@ -1,9 +1,16 @@
 package co.com.pragma.model.template;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+public enum EmailTemplate {
+    STATE_CHANGE("state-change-notification"),
+    PAY_PLAN("pay-plan-notification");
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class EmailTemplate {
-    public static final String STATE_CHANGE = "state-change-notification";
+    private final String templateName;
+
+    EmailTemplate(String templateName) {
+        this.templateName = templateName;
+    }
+
+    public String getTemplateName() {
+        return templateName;
+    }
 }

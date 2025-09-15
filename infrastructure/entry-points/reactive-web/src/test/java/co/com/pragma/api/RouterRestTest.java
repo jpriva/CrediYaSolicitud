@@ -53,7 +53,7 @@ import static org.mockito.Mockito.when;
         GlobalExceptionHandler.class, WebSecurityConfig.class,
         CustomAccessDeniedHandler.class, CustomAuthenticationEntryPoint.class
 })
-@WebFluxTest
+@WebFluxTest(controllers = GlobalExceptionHandler.class)
 class RouterRestTest {
 
     @Autowired

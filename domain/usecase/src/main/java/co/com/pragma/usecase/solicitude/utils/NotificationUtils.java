@@ -2,19 +2,20 @@ package co.com.pragma.usecase.solicitude.utils;
 
 import co.com.pragma.model.constants.DefaultValues;
 import co.com.pragma.model.solicitude.Solicitude;
+import co.com.pragma.model.template.Installment;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class NotificationUtils {
 
     public static final String DEFAULT_STATE_CHANGE = "Your loan application's state change";
+    public static final String DEFAULT_PAY_PLAN = "Loan application pay plan";
 
     public static Map<String, Object> solicitudeChangeStateBody(Solicitude solicitude) {
         Map<String, Object> context = new HashMap<>();
@@ -26,6 +27,57 @@ public class NotificationUtils {
         context.put("stateClass", getStateClass(solicitude.getState().getName()));
 
         return context;
+    }
+
+    public static Map<String, Object> userPayPlan(Solicitude solicitude) {
+        BigDecimal principal = solicitude.getValue();
+        double annualInterestRate = solicitude.getLoanType().getInterestRate().multiply(new BigDecimal(12)).doubleValue();
+        int termInMonths = solicitude.getDeadline();
+
+        double monthlyInterestRate = solicitude.getLoanType().getInterestRate().doubleValue() / 100;
+        BigDecimal monthlyPayment = calculateMonthlyPayment(principal, monthlyInterestRate, termInMonths);
+
+        List<Installment> installments = new ArrayList<>();
+        BigDecimal remainingBalance = principal;
+        BigDecimal totalInterest = BigDecimal.ZERO;
+
+        for (int month = 1; month <= termInMonths; month++) {
+            BigDecimal interestPaid = remainingBalance.multiply(BigDecimal.valueOf(monthlyInterestRate)).setScale(2, RoundingMode.HALF_UP);
+            BigDecimal principalPaid = monthlyPayment.subtract(interestPaid);
+            remainingBalance = remainingBalance.subtract(principalPaid);
+            totalInterest = totalInterest.add(interestPaid);
+
+            if (month == termInMonths && remainingBalance.abs().compareTo(BigDecimal.valueOf(0.01)) < 0) {
+                principalPaid = principalPaid.add(remainingBalance);
+                remainingBalance = BigDecimal.ZERO;
+            }
+
+            installments.add(new Installment(
+                    month,
+                    formatCurrency(principalPaid),
+                    formatCurrency(interestPaid),
+                    formatCurrency(remainingBalance)
+            ));
+        }
+
+        Map<String, Object> context = new HashMap<>();
+        context.put("solicitudeId", solicitude.getSolicitudeId());
+        context.put("loanValue", formatCurrency(principal));
+        context.put("interestRate", String.format("%.2f%%", annualInterestRate));
+        context.put("deadline", termInMonths);
+        context.put("monthlyPayment", formatCurrency(monthlyPayment));
+        context.put("totalInterest", formatCurrency(totalInterest));
+        context.put("totalPayment", formatCurrency(principal.add(totalInterest)));
+        context.put("installments", installments);
+        return context;
+    }
+
+    private static BigDecimal calculateMonthlyPayment(BigDecimal principal, double monthlyInterestRate, int termInMonths) {
+        if (monthlyInterestRate == 0) {
+            return principal.divide(BigDecimal.valueOf(termInMonths), 2, RoundingMode.HALF_UP);
+        }
+        double factor = Math.pow(1 + monthlyInterestRate, termInMonths);
+        return principal.multiply(BigDecimal.valueOf(monthlyInterestRate * factor / (factor - 1))).setScale(2, RoundingMode.HALF_UP);
     }
 
     private static String formatCurrency(BigDecimal value) {
@@ -40,6 +92,7 @@ public class NotificationUtils {
         return switch (stateName) {
             case DefaultValues.APPROVED_STATE -> "approved";
             case DefaultValues.REJECTED_STATE -> "rejected";
+            case DefaultValues.MANUAL_STATE -> "manual";
             default -> "pending";
         };
     }

@@ -53,6 +53,10 @@ public class WebSecurityConfig {
                                 ApiPathMatchers.TEST_MATCHER
                         ).permitAll()
                         .pathMatchers(
+                                HttpMethod.POST, ApiPathMatchers.DEBT_CAPACITY_MATCHER
+                        ).hasAnyAuthority(
+                                ApiConstants.Role.CALLBACK_ROLE
+                        ).pathMatchers(
                                 HttpMethod.POST, ApiPathMatchers.SOLICITUDE_MATCHER
                         ).hasAnyAuthority(
                                 ApiConstants.Role.CLIENT_ROLE_NAME
