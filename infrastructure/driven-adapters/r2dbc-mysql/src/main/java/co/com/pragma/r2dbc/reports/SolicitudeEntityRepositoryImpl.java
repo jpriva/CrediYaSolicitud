@@ -86,7 +86,7 @@ public class SolicitudeEntityRepositoryImpl implements SolicitudeEntityRepositor
                 FROM solicitud sx
                 JOIN tipo_prestamo tpx ON tpx.id_tipo_prestamo = sx.id_tipo_prestamo
                 JOIN estados ex ON ex.id_estado = sx.id_estado
-                WHERE sx.email = :email
+                WHERE sx.email = :email and ex.nombre = 'APROBADO'
                 """;
         DatabaseClient.GenericExecuteSpec executeSpec = databaseClient.sql(sql)
                 .bind("email",email);

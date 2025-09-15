@@ -60,7 +60,7 @@ public class SolicitudeUseCase {
                                     return Mono.empty();
                                 })
                                 .thenReturn(savedSolicitude)
-                )
+                ).doOnSuccess(s -> logger.info("Successfully saved solicitude with ID: {}", s.getSolicitudeId()))
                 .as(transactionalPort::transactional);
     }
 
@@ -71,31 +71,42 @@ public class SolicitudeUseCase {
                                 .onErrorResume(error -> {
                                     logger.error("Failed to send state change notification for solicitude {}. Error will be ignored.", solicitude.getSolicitudeId(), error);
                                     return Mono.empty();
-                                }).thenReturn(solicitude)
-                ).as(transactionalPort::transactional);
+                                })
+                                .thenReturn(solicitude)
+                )
+                .doFirst(() -> logger.info("Starting state change process for solicitude ID: {} to state: {}", solicitudeId, state))
+                .doOnSuccess(solicitude -> logger.info("Successfully changed state for solicitude ID: {} to: {}", solicitude.getSolicitudeId(), solicitude.getState().getName()))
+                .doOnError(ex -> logger.error("Error changing state for solicitude ID: {}", solicitudeId, ex))
+                .as(transactionalPort::transactional);
     }
 
     public Mono<EmailMessage> debtCapacityStateChange(Integer solicitudeId, String state) {
         return changeState(solicitudeId, state, true)
-                .flatMap(solicitude ->
-                    payPlanNotification(solicitude, state)
-                ).as(transactionalPort::transactional);
+                .flatMap(solicitude -> payPlanNotification(solicitude, state))
+                .doFirst(() -> logger.info("Starting debt capacity state change for solicitude ID: {} to state: {}", solicitudeId, state))
+                .doOnSuccess(email -> logger.info("Successfully generated notification for solicitude ID: {}", solicitudeId))
+                .doOnError(ex -> logger.error("Error during debt capacity state change for solicitude ID: {}", solicitudeId, ex))
+                .as(transactionalPort::transactional);
     }
 
     // START Private methods ***********************************************************
 
-    private Mono<EmailMessage> stateNotification(Solicitude solicitude){
+    private Mono<EmailMessage> stateNotification(Solicitude solicitude) {
         return Mono.fromCallable(() -> NotificationUtils.solicitudeChangeStateBody(solicitude))
                 .flatMap(context -> templatePort.process(EmailTemplate.STATE_CHANGE.getTemplateName(), context))
+                .doOnSuccess(body -> logger.info("Generated State Notification Email Body:\n{}", body))
                 .map(body -> EmailMessage.builder().to(solicitude.getEmail()).subject(NotificationUtils.DEFAULT_STATE_CHANGE).body(body).build());
     }
 
-    private Mono<EmailMessage> payPlanNotification(Solicitude solicitude, String state){
+    private Mono<EmailMessage> payPlanNotification(Solicitude solicitude, String state) {
         if (state.equals(DefaultValues.APPROVED_STATE)) {
+            logger.info("Generating pay plan notification for approved solicitude ID: {}", solicitude.getSolicitudeId());
             return Mono.fromCallable(() -> NotificationUtils.userPayPlan(solicitude))
                     .flatMap(context -> templatePort.process(EmailTemplate.PAY_PLAN.getTemplateName(), context))
+                    .doOnSuccess(body -> logger.info("Generated Pay Plan Email Body:\n{}", body))
                     .map(body -> EmailMessage.builder().to(solicitude.getEmail()).subject(NotificationUtils.DEFAULT_PAY_PLAN).body(body).build());
         }
+        logger.info("Generating standard state change notification for solicitude ID: {}", solicitude.getSolicitudeId());
         return stateNotification(solicitude);
     }
 
@@ -116,6 +127,7 @@ public class SolicitudeUseCase {
                 .flatMap(solicitudeFull -> {
                     if (state.getName().equals(solicitudeFull.getState().getName()))
                         return Mono.error(new InvalidFieldException(DefaultValues.STATE_FIELD));
+                    logger.info("Saving state change for solicitude ID: {} to state: {}", solicitudeFull.getSolicitudeId(), state.getName());
                     return solicitudeRepository.save(solicitudeFull.toBuilder().state(state).build())
                             .map(s ->
                                     s.toBuilder().state(state).loanType(solicitudeFull.getLoanType()).build()
@@ -164,7 +176,7 @@ public class SolicitudeUseCase {
                         .map(fee ->
                                 SolicitudeUtils.buildDebtCapacity(user, savedSolicitude, fee, jwtPort)
                         )
-                )
+                ).doOnNext(debtCapacity -> logger.info("Sending debt capacity calculation to SQS for solicitude ID: {}", savedSolicitude.getSolicitudeId()))
                 .flatMap(sqsPort::sendDebtCapacity);
     }
 

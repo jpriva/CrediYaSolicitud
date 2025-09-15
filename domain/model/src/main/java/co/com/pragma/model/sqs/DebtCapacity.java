@@ -11,12 +11,10 @@ import java.math.BigDecimal;
 @Builder(toBuilder = true)
 public class DebtCapacity {
     private Integer solicitudeId;
-    private String email;
     private BigDecimal baseSalary;
     private BigDecimal value;
     private BigDecimal interestRate;
     private Integer deadline;
     private BigDecimal currentTotalMonthlyFee;
-    private Integer deadline;
     private String token;
 }

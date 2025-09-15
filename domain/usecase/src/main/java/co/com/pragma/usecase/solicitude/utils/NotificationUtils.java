@@ -30,8 +30,12 @@ public class NotificationUtils {
     }
 
     public static Map<String, Object> userPayPlan(Solicitude solicitude) {
+        Objects.requireNonNull(solicitude, "Solicitude cannot be null for generating a pay plan.");
+        Objects.requireNonNull(solicitude.getValue(), "Solicitude value (principal) cannot be null.");
+        Objects.requireNonNull(solicitude.getLoanType(), "Solicitude loan type cannot be null.");
+        Objects.requireNonNull(solicitude.getLoanType().getInterestRate(), "Solicitude interest rate cannot be null.");
+
         BigDecimal principal = solicitude.getValue();
-        double annualInterestRate = solicitude.getLoanType().getInterestRate().multiply(new BigDecimal(12)).doubleValue();
         int termInMonths = solicitude.getDeadline();
 
         double monthlyInterestRate = solicitude.getLoanType().getInterestRate().doubleValue() / 100;
@@ -51,7 +55,6 @@ public class NotificationUtils {
                 principalPaid = principalPaid.add(remainingBalance);
                 remainingBalance = BigDecimal.ZERO;
             }
-
             installments.add(new Installment(
                     month,
                     formatCurrency(principalPaid),
@@ -63,7 +66,7 @@ public class NotificationUtils {
         Map<String, Object> context = new HashMap<>();
         context.put("solicitudeId", solicitude.getSolicitudeId());
         context.put("loanValue", formatCurrency(principal));
-        context.put("interestRate", String.format("%.2f%%", annualInterestRate));
+        context.put("interestRate", String.format("%.2f%%", solicitude.getLoanType().getInterestRate().doubleValue()));
         context.put("deadline", termInMonths);
         context.put("monthlyPayment", formatCurrency(monthlyPayment));
         context.put("totalInterest", formatCurrency(totalInterest));

@@ -3,16 +3,17 @@ package co.com.pragma.api.dto.solicitude;
 import co.com.pragma.api.constants.ApiConstants.StateChangeDocs;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder(toBuilder = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class DebtCapacityRequestDTO {
 
-    @NotBlank
+    @NotNull
     @Schema(
             description = StateChangeDocs.ID_SOLICITUDE_DESC,
             example = StateChangeDocs.EXAMPLE_ID_SOLICITUDE

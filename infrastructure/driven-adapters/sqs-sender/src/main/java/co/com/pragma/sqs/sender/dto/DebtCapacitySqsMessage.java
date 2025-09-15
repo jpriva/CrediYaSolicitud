@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 @Builder
 public class DebtCapacitySqsMessage {
     private Integer solicitudeId;
-    private String email;
     @JsonSerialize(using = MoneySerializer.class)
     private BigDecimal baseSalary;
     @JsonSerialize(using = MoneySerializer.class)
@@ -21,6 +20,5 @@ public class DebtCapacitySqsMessage {
     private Integer deadline;
     @JsonSerialize(using = MoneySerializer.class)
     private BigDecimal currentTotalMonthlyFee;
-    private Integer deadline;
     private String token;
 }
