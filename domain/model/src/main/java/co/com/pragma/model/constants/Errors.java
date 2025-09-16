@@ -59,4 +59,12 @@ public class Errors {
     public static final String USER_GATEWAY_ERROR_FROM_SERVICE = "Error from user service";
     public static final String USER_GATEWAY_ERROR_FROM_SERVICE_CODE = "GW-001";
 
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class QueueError{
+        public static final String ALIAS_EMPTY = "Queue not set.";
+        public static final String ALIAS_EMPTY_CODE = "Q001";
+        public static final String NOT_FOUND = "Queue not found.";
+        public static final String NOT_FOUND_CODE = "Q002";
+    }
+
 }

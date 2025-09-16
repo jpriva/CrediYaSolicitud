@@ -1,7 +1,9 @@
 package co.com.pragma.api.solicitude;
 
+import co.com.pragma.api.dto.solicitude.DebtCapacityRequestDTO;
 import co.com.pragma.api.dto.solicitude.SolicitudeRequestDTO;
 import co.com.pragma.api.dto.solicitude.UpdateStatusRequestDTO;
+import co.com.pragma.api.mapper.email.EmailDTOMapper;
 import co.com.pragma.api.mapper.page.PageMapper;
 import co.com.pragma.api.mapper.report.FilterMapper;
 import co.com.pragma.api.mapper.report.SolicitudeReportMapper;
@@ -31,6 +33,7 @@ public class SolicitudeHandler {
     private final SolicitudeReportMapper solicitudeReportMapper;
     private final PageMapper pageMapper;
     private final JwtProviderPort jwtProvider;
+    private final EmailDTOMapper emailMapper;
 
 
     public Mono<ServerResponse> listenPOSTSaveSolicitudeUseCase(ServerRequest serverRequest) {
@@ -71,7 +74,7 @@ public class SolicitudeHandler {
         Integer solicitudeId = Integer.valueOf(serverRequest.pathVariable("id"));
         return serverRequest.bodyToMono(UpdateStatusRequestDTO.class)
                 .flatMap(updateRequest -> {
-                    String state =updateRequest.getState();
+                    String state = updateRequest.getState();
                     return solicitudeUseCase.approveRejectSolicitudeState(
                             solicitudeId,
                             state
@@ -82,6 +85,20 @@ public class SolicitudeHandler {
                         ServerResponse.ok()
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .bodyValue(updatedSolicitude)
+                );
+    }
+
+    public Mono<ServerResponse> listenPOSTDebtCapacityUseCase(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(DebtCapacityRequestDTO.class)
+                .flatMap(debtCapacityRequest ->
+                        solicitudeUseCase.debtCapacityStateChange(
+                                debtCapacityRequest.getSolicitudeId(),
+                                debtCapacityRequest.getState()
+                        ).map(emailMapper::toDto)
+                ).flatMap(email ->
+                        ServerResponse.ok()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(email)
                 );
     }
 }

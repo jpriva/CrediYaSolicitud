@@ -1,4 +1,6 @@
 # Configuration for functional testing against a real AWS account
 adapters:
   sqs:
-    queueUrl: "https://sqs.us-east-1.amazonaws.com/096187159240/solicitude-approved-queue"
+    queues:
+      state-change: "https://sqs.us-east-1.amazonaws.com/096187159240/solicitude-approved-queue"
+      debt-capacity: "https://sqs.us-east-1.amazonaws.com/096187159240/debt-capacity-queue"

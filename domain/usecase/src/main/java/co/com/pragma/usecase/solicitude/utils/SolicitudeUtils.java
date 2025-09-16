@@ -3,11 +3,14 @@ package co.com.pragma.usecase.solicitude.utils;
 import co.com.pragma.model.constants.DefaultValues;
 import co.com.pragma.model.exceptions.*;
 import co.com.pragma.model.jwt.JwtData;
+import co.com.pragma.model.jwt.gateways.JwtProviderPort;
 import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.exceptions.LoanTypeValueErrorException;
 import co.com.pragma.model.solicitude.Solicitude;
 import co.com.pragma.model.solicitude.exceptions.SolicitudeNullException;
+import co.com.pragma.model.sqs.DebtCapacity;
 import co.com.pragma.model.state.exceptions.StateNotFoundException;
+import co.com.pragma.model.user.UserProjection;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -90,12 +93,26 @@ public class SolicitudeUtils {
         return Mono.error(new InvalidCredentialsException());
     }
 
-    public static Mono<Void> validateApproveRejectRequestedData(Integer solicitudeId, String state){
+    public static Mono<Void> validateApproveRejectRequestedData(Integer solicitudeId, String state, boolean acceptsManual) {
         if (solicitudeId == null) return Mono.error(new SolicitudeNullException());
         if (state == null) return Mono.error(new StateNotFoundException());
-        if (!state.equals(DefaultValues.APPROVED_STATE) &&
-                !state.equals(DefaultValues.REJECTED_STATE))
+        if (!(state.equals(DefaultValues.APPROVED_STATE) ||
+                state.equals(DefaultValues.REJECTED_STATE) ||
+                (acceptsManual && state.equals(DefaultValues.MANUAL_STATE)))
+        )
             return Mono.error(new InvalidFieldException(DefaultValues.STATE_FIELD));
         return Mono.empty();
+    }
+
+    public static DebtCapacity buildDebtCapacity(UserProjection user, Solicitude solicitude, BigDecimal totalFee, JwtProviderPort jwtPort) {
+        return DebtCapacity.builder()
+                .solicitudeId(solicitude.getSolicitudeId())
+                .baseSalary(user.getBaseSalary())
+                .value(solicitude.getValue())
+                .interestRate(solicitude.getLoanType().getInterestRate())
+                .currentTotalMonthlyFee(totalFee)
+                .deadline(solicitude.getDeadline())
+                .token(jwtPort.generateCallbackToken(solicitude.getSolicitudeId().toString()))
+                .build();
     }
 }

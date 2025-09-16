@@ -73,8 +73,8 @@ public class SolicitudeDocumentation {
                     beanMethod = "listenPUTUpdateSolicitudeStatusUseCase",
                     operation = @Operation(
                             operationId = ApiConstants.ApiOperations.OPERATION_UPDATE_SOLICITUDE_STATUS_ID,
-                            summary = ApiConstants.SolicitudeDocs.UPDATE_SOLICITUDE_STATUS_SUMMARY,
-                            description = ApiConstants.SolicitudeDocs.UPDATE_SOLICITUDE_STATUS_DESCRIPTION,
+                            summary = ApiConstants.StateChangeDocs.APPROVE_REJECT_OP_SUMMARY,
+                            description = ApiConstants.StateChangeDocs.APPROVE_REJECT_OP_DESC,
                             parameters = {
                                     @Parameter(in = ParameterIn.PATH, name = "id", required = true, description = ApiConstants.SolicitudeDocs.SOLICITUDE_ID_PARAM_DESCRIPTION, schema = @Schema(type = "integer", format = "int32"))
                             },

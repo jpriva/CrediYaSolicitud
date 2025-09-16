@@ -1,10 +1,17 @@
 package co.com.pragma.sqs.sender;
 
+import co.com.pragma.model.sqs.DebtCapacity;
+import co.com.pragma.model.sqs.exceptions.QueueAliasEmptyException;
+import co.com.pragma.model.sqs.exceptions.QueueNotFoundException;
 import co.com.pragma.model.sqs.gateways.SQSPort;
+import co.com.pragma.model.template.EmailMessage;
+import co.com.pragma.sqs.sender.config.QueueAlias;
 import co.com.pragma.sqs.sender.config.SQSSenderProperties;
-import co.com.pragma.sqs.sender.dto.EmailSqsMessage;
+import co.com.pragma.sqs.sender.mapper.DebtCapacityMapper;
+import co.com.pragma.sqs.sender.mapper.EmailMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -20,39 +27,68 @@ public class SQSSender implements SQSPort {
     private final SQSSenderProperties properties;
     private final SqsAsyncClient client;
     private final ObjectMapper objectMapper;
+    private final DebtCapacityMapper debtCapacityMapper;
+    private final EmailMapper emailMapper;
 
-    public Mono<String> send(String message) {
-        return Mono.fromCallable(() -> buildRequest(message))
+    public Mono<String> send(String queueAlias, String message) {
+        return Mono.justOrEmpty(queueAlias)
+                .switchIfEmpty(Mono.error(new QueueAliasEmptyException()))
+                .flatMap(alias -> Mono.justOrEmpty(properties.queues().get(alias)))
+                .switchIfEmpty(Mono.error(new QueueNotFoundException()))
+                .map(queueUrl -> buildRequest(queueUrl, message))
                 .flatMap(request -> Mono.fromFuture(client.sendMessage(request)))
                 .doOnNext(response -> log.debug("Message sent {}", response.messageId()))
                 .map(SendMessageResponse::messageId);
     }
 
-    private SendMessageRequest buildRequest(String message) {
+    private SendMessageRequest buildRequest(String url, String message) {
         return SendMessageRequest.builder()
-                .queueUrl(properties.queueUrl())
+                .queueUrl(url)
                 .messageBody(message)
                 .build();
     }
 
     @Override
-    public void sendEmail(String email, String title, String message) {
-        EmailSqsMessage payload = EmailSqsMessage.builder()
-                .to(email)
-                .subject(title)
-                .body(message)
-                .build();
+    public Mono<Void> sendEmail(EmailMessage emailMessage) {
+        var payload = emailMapper.toSqsMessage(emailMessage);
+        return sendGenericMessage(QueueAlias.NOTIFY_STATE_CHANGE, payload, "email notification for " + emailMessage.getTo());
+    }
+
+    @Override
+    public Mono<Void> sendDebtCapacity(DebtCapacity debtCapacity) {
+        var payload = debtCapacityMapper.toSqsMessage(debtCapacity);
+        return sendGenericMessage(QueueAlias.CALCULATE_DEBT_CAPACITY, payload, "debt capacity calculation");
+    }
+
+    private <T> Mono<Void> sendGenericMessage(String queueAlias, T payload, String logContext) {
         try {
             String jsonMessage = objectMapper.writeValueAsString(payload);
-            log.info("Sending email notification to SQS for recipient: [{}] : {}", email, jsonMessage);
-            this.send(jsonMessage)
-                    .subscribe(
-                            messageId -> log.info("Email notification for {} queued successfully with Message ID: {}", email, messageId),
-                            error -> log.error("Failed to send email notification to SQS for recipient: {}. Error: {}", email, error.getMessage())
-                    );
-
+            log.info("Sending {} to SQS: {}", logContext, jsonMessage);
+            logPayloadSqs(jsonMessage);
+            return this.send(queueAlias, jsonMessage)
+                    .doOnSuccess(
+                            messageId -> log.info("Payload for {} queued successfully with Message ID: {}", logContext, messageId)
+                    )
+                    .doOnError(
+                            error -> log.error("Failed to send payload for {}. Error: {}", logContext, error.getMessage())
+                    ).then();
         } catch (JsonProcessingException e) {
-            log.error("Error creating JSON payload for email notification. Recipient: {}. Error: {}", email, e.getMessage());
+            log.error("Error creating JSON payload for {}. Error: {}", logContext, e.getMessage());
+            return Mono.error(e);
+        }
+    }
+
+    private void logPayloadSqs(String payload){
+        try {
+            ObjectNode sqsRecord = objectMapper.createObjectNode();
+            sqsRecord.put("messageId", "test-message-id");
+            sqsRecord.put("body", payload);
+            ObjectNode sqsEvent = objectMapper.createObjectNode();
+            sqsEvent.set("Records", objectMapper.createArrayNode().add(sqsRecord));
+            String finalJsonForLambda = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sqsEvent);
+            log.info("Escaped payload: {}", finalJsonForLambda);
+        } catch (Exception e){
+            log.error("Can't log the payload as sqs: {}", payload, e);
         }
     }
 }

@@ -1,5 +1,6 @@
 package co.com.pragma.api.config;
 
+import co.com.pragma.api.mapper.email.EmailDTOMapper;
 import co.com.pragma.api.mapper.page.PageMapper;
 import co.com.pragma.api.mapper.report.SolicitudeReportMapper;
 import co.com.pragma.api.solicitude.SolicitudeHandler;
@@ -47,6 +48,9 @@ class ConfigTest {
 
     @MockitoBean
     private PageMapper pageMapper;
+
+    @MockitoBean
+    private EmailDTOMapper emailMapper;
 
     @Test
     void corsConfigurationShouldAllowOrigins() {

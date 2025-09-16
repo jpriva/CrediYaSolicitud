@@ -74,4 +74,22 @@ public class SolicitudeEntityRepositoryImpl implements SolicitudeEntityRepositor
         }
         return executeSpec.map(row -> row.get(0, Long.class)).one().defaultIfEmpty(0L);
     }
+
+    @Override
+    public Mono<BigDecimal> findTotalMonthlyFee(String email) {
+        String sql = """
+                SELECT COALESCE(SUM(
+                   sx.monto *
+                   ( (tpx.tasa_interes/100) * POWER(1 + (tpx.tasa_interes/100), sx.plazo) ) /
+                   ( POWER(1 + (tpx.tasa_interes/100), sx.plazo ) - 1 )
+                ), 0)
+                FROM solicitud sx
+                JOIN tipo_prestamo tpx ON tpx.id_tipo_prestamo = sx.id_tipo_prestamo
+                JOIN estados ex ON ex.id_estado = sx.id_estado
+                WHERE sx.email = :email and ex.nombre = 'APROBADO'
+                """;
+        DatabaseClient.GenericExecuteSpec executeSpec = databaseClient.sql(sql)
+                .bind("email",email);
+        return executeSpec.map(row -> row.get(0, BigDecimal.class)).one().defaultIfEmpty(BigDecimal.ZERO);
+    }
 }

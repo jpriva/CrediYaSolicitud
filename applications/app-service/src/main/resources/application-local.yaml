@@ -1,5 +1,7 @@
 # Configuration for local development using LocalStack
 adapters:
   sqs:
-    queueUrl: "http://localhost:4566/000000000000/solicitude-approved-queue"
+    queues:
+      state-change: "http://localhost:4566/000000000000/solicitude-approved-queue"
+      debt-capacity: "http://localhost:4566/000000000000/debt-capacity-queue"
     endpoint: "http://localhost:4566"
