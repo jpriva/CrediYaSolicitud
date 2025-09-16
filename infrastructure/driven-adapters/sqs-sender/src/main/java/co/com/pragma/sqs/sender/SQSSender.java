@@ -11,6 +11,7 @@ import co.com.pragma.sqs.sender.mapper.DebtCapacityMapper;
 import co.com.pragma.sqs.sender.mapper.EmailMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -63,6 +64,7 @@ public class SQSSender implements SQSPort {
         try {
             String jsonMessage = objectMapper.writeValueAsString(payload);
             log.info("Sending {} to SQS: {}", logContext, jsonMessage);
+            logPayloadSqs(jsonMessage);
             return this.send(queueAlias, jsonMessage)
                     .doOnSuccess(
                             messageId -> log.info("Payload for {} queued successfully with Message ID: {}", logContext, messageId)
@@ -73,6 +75,20 @@ public class SQSSender implements SQSPort {
         } catch (JsonProcessingException e) {
             log.error("Error creating JSON payload for {}. Error: {}", logContext, e.getMessage());
             return Mono.error(e);
+        }
+    }
+
+    private void logPayloadSqs(String payload){
+        try {
+            ObjectNode sqsRecord = objectMapper.createObjectNode();
+            sqsRecord.put("messageId", "test-message-id");
+            sqsRecord.put("body", payload);
+            ObjectNode sqsEvent = objectMapper.createObjectNode();
+            sqsEvent.set("Records", objectMapper.createArrayNode().add(sqsRecord));
+            String finalJsonForLambda = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sqsEvent);
+            log.info("Escaped payload: {}", finalJsonForLambda);
+        } catch (Exception e){
+            log.error("Can't log the payload as sqs: {}", payload, e);
         }
     }
 }

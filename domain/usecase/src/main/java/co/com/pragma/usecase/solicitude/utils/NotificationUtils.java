@@ -47,14 +47,17 @@ public class NotificationUtils {
 
         for (int month = 1; month <= termInMonths; month++) {
             BigDecimal interestPaid = remainingBalance.multiply(BigDecimal.valueOf(monthlyInterestRate)).setScale(2, RoundingMode.HALF_UP);
-            BigDecimal principalPaid = monthlyPayment.subtract(interestPaid);
+            BigDecimal principalPaid;
+
+            if (month == termInMonths) {
+                principalPaid = remainingBalance;
+            } else {
+                principalPaid = monthlyPayment.subtract(interestPaid);
+            }
+
             remainingBalance = remainingBalance.subtract(principalPaid);
             totalInterest = totalInterest.add(interestPaid);
 
-            if (month == termInMonths && remainingBalance.abs().compareTo(BigDecimal.valueOf(0.01)) < 0) {
-                principalPaid = principalPaid.add(remainingBalance);
-                remainingBalance = BigDecimal.ZERO;
-            }
             installments.add(new Installment(
                     month,
                     formatCurrency(principalPaid),

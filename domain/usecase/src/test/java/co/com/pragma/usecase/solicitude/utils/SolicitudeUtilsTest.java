@@ -1,20 +1,27 @@
 package co.com.pragma.usecase.solicitude.utils;
 
 import co.com.pragma.model.constants.DefaultValues;
+import co.com.pragma.model.jwt.gateways.JwtProviderPort;
 import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.exceptions.LoanTypeValueErrorException;
 import co.com.pragma.model.solicitude.Solicitude;
 import co.com.pragma.model.exceptions.FieldBlankException;
 import co.com.pragma.model.exceptions.FieldSizeOutOfBounds;
 import co.com.pragma.model.exceptions.ValueOutOfBoundsException;
+import co.com.pragma.model.sqs.DebtCapacity;
+import co.com.pragma.model.user.UserProjection;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class SolicitudeUtilsTest {
 
@@ -216,6 +223,53 @@ class SolicitudeUtilsTest {
             StepVerifier.create(SolicitudeUtils.verifySolicitudeLoanType(solicitude))
                     .expectError(LoanTypeValueErrorException.class)
                     .verify();
+        }
+    }
+
+    @Nested
+    @ExtendWith(MockitoExtension.class)
+    class BuildDebtCapacityTests {
+
+        @Mock
+        private JwtProviderPort jwtProviderPort;
+
+        @Test
+        void shouldBuildDebtCapacityCorrectly() {
+            // Arrange
+            UserProjection user = UserProjection.builder()
+                    .baseSalary(new BigDecimal("5000000"))
+                    .build();
+
+            LoanType loanType = LoanType.builder()
+                    .interestRate(new BigDecimal("1.5"))
+                    .build();
+
+            Solicitude solicitude = Solicitude.builder()
+                    .solicitudeId(123)
+                    .value(new BigDecimal("10000000"))
+                    .deadline(24)
+                    .loanType(loanType)
+                    .build();
+
+            BigDecimal totalFee = new BigDecimal("500000");
+            String expectedToken = "generated-callback-token";
+
+            when(jwtProviderPort.generateCallbackToken("123")).thenReturn(expectedToken);
+
+            // Act
+            DebtCapacity result = SolicitudeUtils.buildDebtCapacity(user, solicitude, totalFee, jwtProviderPort);
+
+            // Assert
+            assertNotNull(result);
+            assertEquals(123, result.getSolicitudeId());
+            assertEquals(new BigDecimal("5000000"), result.getBaseSalary());
+            assertEquals(new BigDecimal("10000000"), result.getValue());
+            assertEquals(new BigDecimal("1.5"), result.getInterestRate());
+            assertEquals(new BigDecimal("500000"), result.getCurrentTotalMonthlyFee());
+            assertEquals(24, result.getDeadline());
+            assertEquals(expectedToken, result.getToken());
+
+            verify(jwtProviderPort).generateCallbackToken("123");
         }
     }
 }
