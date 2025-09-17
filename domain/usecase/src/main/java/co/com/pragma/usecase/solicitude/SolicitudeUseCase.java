@@ -14,6 +14,8 @@ import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.model.solicitude.Solicitude;
 import co.com.pragma.model.solicitude.exceptions.SolicitudeNullException;
 import co.com.pragma.model.solicitude.gateways.SolicitudeRepository;
+import co.com.pragma.model.sqs.Metric;
+import co.com.pragma.model.sqs.Metrics;
 import co.com.pragma.model.sqs.gateways.SQSPort;
 import co.com.pragma.model.state.State;
 import co.com.pragma.model.state.exceptions.StateNotFoundException;
@@ -28,6 +30,8 @@ import co.com.pragma.usecase.solicitude.utils.NotificationUtils;
 import co.com.pragma.usecase.solicitude.utils.SolicitudeUtils;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
+
+import java.math.BigDecimal;
 
 @RequiredArgsConstructor
 public class SolicitudeUseCase {
@@ -94,7 +98,7 @@ public class SolicitudeUseCase {
     private Mono<EmailMessage> stateNotification(Solicitude solicitude) {
         return Mono.fromCallable(() -> NotificationUtils.solicitudeChangeStateBody(solicitude))
                 .flatMap(context -> templatePort.process(EmailTemplate.STATE_CHANGE.getTemplateName(), context))
-                .doOnSuccess(body -> logger.info("Generated State Notification Email Body:\n{}", body))
+                .doOnSuccess(body -> logger.debug("Generated State Notification Email Body:\n{}", body))
                 .map(body -> EmailMessage.builder().to(solicitude.getEmail()).subject(NotificationUtils.DEFAULT_STATE_CHANGE).body(body).build());
     }
 
@@ -119,7 +123,17 @@ public class SolicitudeUseCase {
                 }))
                 .flatMap(tStateSolicitude ->
                         saveStateChange(tStateSolicitude.getT1(), tStateSolicitude.getT2())
+                                .flatMap(this::sendApprovedMetric)
                 );
+    }
+
+    private Mono<Solicitude> sendApprovedMetric(Solicitude solicitude) {
+        if (solicitude == null || solicitude.getState() == null || solicitude.getState().getName() == null) return Mono.empty();
+        if (!solicitude.getState().getName().equals(DefaultValues.APPROVED_STATE)) return Mono.empty();
+        logger.info("Sending approved metric for solicitude ID: {}", solicitude.getSolicitudeId());
+        Metric metric = new Metric(Metrics.QUANTITY_METRIC, BigDecimal.ONE);
+        return sqsPort.sendMetric(metric)
+                .thenReturn(solicitude);
     }
 
     private Mono<Solicitude> saveStateChange(State state, Solicitude solicitude) {

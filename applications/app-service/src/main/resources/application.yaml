@@ -31,8 +31,9 @@ adapters:
     pathUsersByFilter: "/api/v1/busquedas/filtro"
   sqs:
     region: "${ADAPTERS_SQS_REGION:us-east-1}"
-    queueUrl: "${ADAPTERS_SQS_QUEUE_URL}"
     endpoint: "${ADAPTERS_SQS_ENDPOINT_OVERRIDE:}"
+    metrics:
+      quantity: "quantity"
 management:
   endpoints:
     web:

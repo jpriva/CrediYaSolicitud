@@ -59,6 +59,18 @@ public class Errors {
     public static final String USER_GATEWAY_ERROR_FROM_SERVICE = "Error from user service";
     public static final String USER_GATEWAY_ERROR_FROM_SERVICE_CODE = "GW-001";
 
+    public static final String METRIC_NOT_FOUND = "Metric not found";
+    public static final String METRIC_NOT_FOUND_CODE = "M001";
+
+    public static final String METRIC_INVALID_VALUE = "Metric invalid value";
+    public static final String METRIC_INVALID_VALUE_CODE = "M002";
+
+    public static final String METRICS_NOT_CONFIGURED = "Metrics not configured";
+    public static final String METRICS_NOT_CONFIGURED_CODE = "M003";
+
+    public static final String METRIC_NOT_CONFIGURED = "Metric not configured";
+    public static final String METRIC_NOT_CONFIGURED_CODE = "M004";
+
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static class QueueError{
         public static final String ALIAS_EMPTY = "Queue not set.";
