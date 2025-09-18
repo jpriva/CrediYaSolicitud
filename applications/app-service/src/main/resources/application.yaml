@@ -6,7 +6,7 @@ spring:
   devtools:
     add-properties: false
   profiles:
-    active: "${SPRING_PROFILES_ACTIVE:local}"
+    active: "${SPRING_PROFILES_ACTIVE:aws}"
   flyway:
     url: "jdbc:mysql://${SPRING_R2DBC_HOST:localhost}:${SPRING_R2DBC_PORT:3307}/${SPRING_R2DBC_DB:solicitudes_db}"
     user: "${SPRING_DB_USERNAME:jpriva}"
@@ -31,8 +31,9 @@ adapters:
     pathUsersByFilter: "/api/v1/busquedas/filtro"
   sqs:
     region: "${ADAPTERS_SQS_REGION:us-east-1}"
-    queueUrl: "${ADAPTERS_SQS_QUEUE_URL}"
     endpoint: "${ADAPTERS_SQS_ENDPOINT_OVERRIDE:}"
+    metrics:
+      quantity: "quantity"
 management:
   endpoints:
     web:

@@ -3,6 +3,7 @@ package co.com.pragma.sqs.sender;
 import co.com.pragma.model.sqs.DebtCapacity;
 import co.com.pragma.model.sqs.exceptions.QueueAliasEmptyException;
 import co.com.pragma.model.sqs.exceptions.QueueNotFoundException;
+import co.com.pragma.model.logs.gateways.LoggerPort;
 import co.com.pragma.model.template.EmailMessage;
 import co.com.pragma.sqs.sender.config.QueueAlias;
 import co.com.pragma.sqs.sender.config.SQSSenderProperties;
@@ -48,6 +49,8 @@ class SQSSenderTest {
     private DebtCapacityMapper debtCapacityMapper;
     @Mock
     private EmailMapper emailMapper;
+    @Mock
+    private LoggerPort logger;
 
     @InjectMocks
     private SQSSender sender;

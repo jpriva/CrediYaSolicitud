@@ -2,6 +2,7 @@
 adapters:
   sqs:
     queues:
-      state-change: "http://localhost:4566/000000000000/solicitude-approved-queue"
-      debt-capacity: "http://localhost:4566/000000000000/debt-capacity-queue"
-    endpoint: "http://localhost:4566"
+      state-change: "${ADAPTERS_SQS_ENDPOINT_OVERRIDE:http://localhost:4566}/000000000000/solicitude-approved-queue"
+      debt-capacity: "${ADAPTERS_SQS_ENDPOINT_OVERRIDE:http://localhost:4566}/000000000000/debt-capacity-queue"
+      metric: "${ADAPTERS_SQS_ENDPOINT_OVERRIDE:http://localhost:4566}/000000000000/solicitude-report-queue"
+    endpoint: "${ADAPTERS_SQS_ENDPOINT_OVERRIDE:http://localhost:4566}"
