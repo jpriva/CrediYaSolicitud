@@ -32,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class SolicitudeUseCase {
@@ -129,10 +130,12 @@ public class SolicitudeUseCase {
 
     private Mono<Solicitude> sendApprovedMetric(Solicitude solicitude) {
         if (solicitude == null || solicitude.getState() == null || solicitude.getState().getName() == null) return Mono.empty();
-        if (!solicitude.getState().getName().equals(DefaultValues.APPROVED_STATE)) return Mono.empty();
+        if (!solicitude.getState().getName().equals(DefaultValues.APPROVED_STATE)) return Mono.just(solicitude);
         logger.info("Sending approved metric for solicitude ID: {}", solicitude.getSolicitudeId());
-        Metric metric = new Metric(Metrics.QUANTITY_METRIC, BigDecimal.ONE);
-        return sqsPort.sendMetric(metric)
+        Metric quantity = new Metric(Metrics.QUANTITY_METRIC, BigDecimal.ONE);
+        Metric amount = new Metric(Metrics.AMOUNT_METRIC, solicitude.getValue());
+        List<Metric> metrics = List.of(quantity, amount);
+        return sqsPort.sendMetric(metrics)
                 .thenReturn(solicitude);
     }
 

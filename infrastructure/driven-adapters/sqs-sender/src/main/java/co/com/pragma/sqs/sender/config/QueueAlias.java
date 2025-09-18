@@ -12,5 +12,6 @@ public class QueueAlias {
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static class MetricNames{
         public static final String QUANTITY = "quantity";
+        public static final String AMOUNT = "amount";
     }
 }

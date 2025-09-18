@@ -4,6 +4,7 @@ import co.com.pragma.model.constants.DefaultValues;
 import co.com.pragma.model.exceptions.InvalidFieldException;
 import co.com.pragma.model.exceptions.ValueOutOfBoundsException;
 import co.com.pragma.model.jwt.JwtData;
+import co.com.pragma.model.jwt.gateways.JwtProviderPort;
 import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.exceptions.LoanTypeNotFoundException;
 import co.com.pragma.model.loantype.gateways.LoanTypeRepository;
@@ -20,6 +21,7 @@ import co.com.pragma.model.template.gateways.TemplatePort;
 import co.com.pragma.model.transaction.gateways.TransactionalPort;
 import co.com.pragma.model.user.UserProjection;
 import co.com.pragma.model.user.gateways.UserPort;
+import co.com.pragma.usecase.solicitude.utils.NotificationUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -55,6 +57,8 @@ class SolicitudeUseCaseTest {
     private TemplatePort templatePort;
     @Mock
     private UserPort userPort;
+    @Mock
+    private JwtProviderPort jwtPort;
 
     @InjectMocks
     private SolicitudeUseCase solicitudeUseCase;
@@ -105,25 +109,38 @@ class SolicitudeUseCaseTest {
     @Test
     void shouldSaveSolicitudeSuccessfully() {
 
-        UserProjection mockUser = UserProjection.builder().baseSalary(new BigDecimal("5000000")).build();
+        UserProjection mockUser = UserProjection.builder()
+                .email("test@example.com")
+                .idNumber("12345")
+                .name("Test User")
+                .baseSalary(new BigDecimal("5000000"))
+                .build();
 
         when(loanTypeRepository.findById(anyInt())).thenReturn(Mono.just(testLoanType));
         when(stateRepository.findOne(any(State.class))).thenReturn(Mono.just(pendingState));
         when(solicitudeRepository.save(any(Solicitude.class))).thenAnswer(invocation -> {
             Solicitude input = invocation.getArgument(0);
-            return Mono.just(input.toBuilder().solicitudeId(100).build());
+            return Mono.just(input.toBuilder()
+                    .solicitudeId(100)
+                    .loanType(LoanType.builder().loanTypeId(input.getLoanType().getLoanTypeId()).build())
+                    .state(State.builder().stateId(input.getState().getStateId()).build())
+                    .build()
+            );
         });
         when(userPort.getUserByEmail(anyString())).thenReturn(Mono.just(mockUser));
         when(solicitudeRepository.findTotalMonthlyFee(anyString())).thenReturn(Mono.just(BigDecimal.ZERO));
+        when(jwtPort.generateCallbackToken(anyString())).thenReturn("fake-callback-token");
+        when(sqsPort.sendDebtCapacity(any())).thenReturn(Mono.empty());
 
         StepVerifier.create(solicitudeUseCase.saveSolicitude(testSolicitude, "12345", testJwtData))
                 .expectNextMatches(result ->
                         result.getSolicitudeId() == 100 &&
                                 result.getEmail().equals(testJwtData.subject()) &&
-                                result.getLoanType().getLoanTypeId() == 1 &&
-                                result.getState().getStateId() == 1
+                                result.getLoanType() != null && result.getLoanType().getLoanTypeId() == 1 &&
+                                result.getState() != null && result.getState().getStateId() == 1
                 )
                 .verifyComplete();
+        verify(sqsPort).sendDebtCapacity(any());
     }
 
     @Test
@@ -352,6 +369,33 @@ class SolicitudeUseCaseTest {
             verify(solicitudeRepository, never()).save(any());
             verify(sqsPort, never()).sendEmail(any(EmailMessage.class));
         }
+
+
+        @Test
+        void approveRejectSolicitudeState_shouldFailWhenStateIsUnchanged() {
+            // Arrange
+            // The testSolicitude is already in PENDING state. We try to change it to PENDING again.
+            String sameState = DefaultValues.APPROVED_STATE;
+
+            // Mocks for changeState
+            when(stateRepository.findByName(sameState)).thenReturn(Mono.just(pendingState));
+            when(solicitudeRepository.findById(1)).thenReturn(Mono.just(testSolicitude));
+
+            // Mocks for the internal 'completeSolicitude' call within saveStateChange
+            when(loanTypeRepository.findById(any())).thenReturn(Mono.just(testLoanType));
+            when(stateRepository.findOne(any())).thenReturn(Mono.just(pendingState));
+
+            // Act
+            Mono<Solicitude> result = solicitudeUseCase.approveRejectSolicitudeState(1, sameState);
+
+            // Assert
+            StepVerifier.create(result)
+                    .expectError(InvalidFieldException.class)
+                    .verify();
+
+            // Verify that save was never called because the flow errored out before.
+            verify(solicitudeRepository, never()).save(any(Solicitude.class));
+        }
     }
 
     @Nested
@@ -404,14 +448,19 @@ class SolicitudeUseCaseTest {
             when(loanTypeRepository.findById(any())).thenReturn(Mono.just(testLoanType));
             when(stateRepository.findOne(any())).thenReturn(Mono.just(pendingState));
             when(solicitudeRepository.save(any(Solicitude.class))).thenReturn(Mono.just(updatedSolicitude));
+            when(templatePort.process(any(), any())).thenReturn(Mono.just("<html>State Change</html>"));
 
             // Act
             Mono<EmailMessage> result = solicitudeUseCase.debtCapacityStateChange(1, "RECHAZADO");
 
-            // Assert: For a rejected state, the use case might not return an email.
-            // We verify that the flow completes successfully.
+            // Assert
             StepVerifier.create(result)
-                    .verifyComplete(); // Expect onComplete() without any onNext() signal.
+                    .expectNextMatches(emailMessage ->
+                            emailMessage.getSubject().equals(NotificationUtils.DEFAULT_STATE_CHANGE) &&
+                                    emailMessage.getBody().equals("<html>State Change</html>") &&
+                                    emailMessage.getTo().equals(testSolicitude.getEmail())
+                    )
+                    .verifyComplete();
         }
 
         @Test
@@ -425,5 +474,6 @@ class SolicitudeUseCaseTest {
                     .expectError(SolicitudeNullException.class)
                     .verify();
         }
+
     }
 }

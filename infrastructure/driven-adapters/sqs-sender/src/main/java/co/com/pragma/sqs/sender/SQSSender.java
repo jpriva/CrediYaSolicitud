@@ -16,10 +16,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -63,12 +66,13 @@ public class SQSSender implements SQSPort {
     }
 
     @Override
-    public Mono<Void> sendMetric(Metric metric) {
-        return MetricMapper.toSqsMessage(metric, properties.metrics())
-                .doOnError(ex -> logger.error("Error creating metric payload. Error: {}", ex.getMessage()))
-                .flatMap(payload ->
-                        sendGenericMessage(QueueAlias.METRIC, payload, "metric " + metric.name())
-                );
+    public Mono<Void> sendMetric(List<Metric> metrics) {
+        return Flux.fromIterable(metrics)
+                .flatMap(metric -> MetricMapper.toSqsMessage(metric, properties.metrics())
+                        .doOnError(ex -> logger.error("Error creating metric payload for metric '{}'. Error: {}", metric.name(), ex.getMessage()))
+                        .flatMap(payload -> sendGenericMessage(QueueAlias.METRIC, payload, "metric " + metric.name()))
+                )
+                .then();
     }
 
     private <T> Mono<Void> sendGenericMessage(String queueAlias, T payload, String logContext) {
