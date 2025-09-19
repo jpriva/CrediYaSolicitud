@@ -1,18 +1,21 @@
 package co.com.pragma.usecase.solicitude.utils;
 
 import co.com.pragma.model.constants.DefaultValues;
+import co.com.pragma.model.exceptions.*;
+import co.com.pragma.model.jwt.JwtData;
 import co.com.pragma.model.jwt.gateways.JwtProviderPort;
 import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.exceptions.LoanTypeValueErrorException;
 import co.com.pragma.model.solicitude.Solicitude;
-import co.com.pragma.model.exceptions.FieldBlankException;
-import co.com.pragma.model.exceptions.FieldSizeOutOfBounds;
-import co.com.pragma.model.exceptions.ValueOutOfBoundsException;
+import co.com.pragma.model.solicitude.exceptions.SolicitudeNullException;
 import co.com.pragma.model.sqs.DebtCapacity;
+import co.com.pragma.model.state.exceptions.StateNotFoundException;
 import co.com.pragma.model.user.UserProjection;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.test.StepVerifier;
@@ -139,6 +142,41 @@ class SolicitudeUtilsTest {
             Solicitude solicitude = createValidSolicitude().toBuilder().email(longEmail).build();
             StepVerifier.create(SolicitudeUtils.validateFields(solicitude))
                     .expectError(FieldSizeOutOfBounds.class)
+                    .verify();
+        }
+
+        @Test
+        void shouldFailWhenLoanTypeIsNegative() {
+            LoanType loanType = LoanType.builder().loanTypeId(-1).build();
+            Solicitude solicitude = createValidSolicitude().toBuilder().loanType(loanType).build();
+            StepVerifier.create(SolicitudeUtils.validateFields(solicitude))
+                    .expectError(FieldSizeOutOfBounds.class)
+                    .verify();
+        }
+
+        @Test
+        void shouldFailWhenDeadLineToBig() {
+            Solicitude solicitude = createValidSolicitude().toBuilder().deadline(DefaultValues.MAX_LENGTH_DEADLINE+1).build();
+            StepVerifier.create(SolicitudeUtils.validateFields(solicitude))
+                    .expectError(FieldSizeOutOfBounds.class)
+                    .verify();
+        }
+
+        @Test
+        void shouldFailWhenLoanTypeMinValueIsNegative() {
+            LoanType loanType = LoanType.builder().loanTypeId(1).minValue(new BigDecimal(-1)).build();
+            Solicitude solicitude = createValidSolicitude().toBuilder().loanType(loanType).build();
+            StepVerifier.create(SolicitudeUtils.verifySolicitudeLoanType(solicitude))
+                    .expectError(LoanTypeValueErrorException.class)
+                    .verify();
+        }
+
+        @Test
+        void shouldFailWhenLoanTypeMaxValueIsNull() {
+            LoanType loanType = LoanType.builder().loanTypeId(1).minValue(new BigDecimal(2)).build();
+            Solicitude solicitude = createValidSolicitude().toBuilder().loanType(loanType).build();
+            StepVerifier.create(SolicitudeUtils.verifySolicitudeLoanType(solicitude))
+                    .expectError(LoanTypeValueErrorException.class)
                     .verify();
         }
     }
@@ -270,6 +308,104 @@ class SolicitudeUtilsTest {
             assertEquals(expectedToken, result.getToken());
 
             verify(jwtProviderPort).generateCallbackToken("123");
+        }
+    }
+
+    @Nested
+    class ValidateFromTokenTest {
+        private JwtData validToken = new JwtData("name@example.com", "ADMIN", 1, "Test", "12345");
+        private Solicitude.SolicitudeBuilder validSolicitude = Solicitude.builder()
+                .solicitudeId(1)
+                .value(BigDecimal.valueOf(10000))
+                .deadline(12)
+                .email("test@example.com")
+                .loanType(LoanType.builder().loanTypeId(1).build());
+
+        @Test
+        void shouldFailWhenTokenIsNull() {
+            Solicitude solicitude = validSolicitude.build();
+            StepVerifier.create(SolicitudeUtils.validateFromToken(solicitude,"1234",null))
+                    .expectError(InvalidCredentialsException.class)
+                    .verify();
+        }
+        @Test
+        void shouldFailWhenTokenIdNumberEqualsNull() {
+            Solicitude solicitude = validSolicitude.build();
+            StepVerifier.create(SolicitudeUtils.validateFromToken(solicitude,null,validToken))
+                    .expectError(InvalidFieldException.class)
+                    .verify();
+        }
+
+        @Test
+        void shouldFailWhenTokenIdNumberIsDifferentFromToken() {
+            Solicitude solicitude = validSolicitude.build();
+            String idNumber = "7894";
+            StepVerifier.create(SolicitudeUtils.validateFromToken(solicitude,idNumber,validToken))
+                    .expectError(InvalidFieldException.class)
+                    .verify();
+        }
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        void shouldFailWhenTokenSubjectIsNullOrBlank(String subject) {
+            Solicitude solicitude = validSolicitude.build();
+            JwtData token = new JwtData(subject, "ADMIN", 1, "Test", "7894");
+            String idNumber = "7894";
+            StepVerifier.create(SolicitudeUtils.validateFromToken(solicitude,idNumber,token))
+                    .expectError(InvalidFieldException.class)
+                    .verify();
+        }
+    }
+
+    @Nested
+    class ValidateApproveRejectRequestedDataTest {
+        @Test
+        void shouldFailWhenSolicitudeIdIsNull(){
+            StepVerifier.create(SolicitudeUtils.validateApproveRejectRequestedData(null,null,true))
+                    .expectError(SolicitudeNullException.class)
+                    .verify();
+        }
+        @Test
+        void shouldFailWhenStateIsNull(){
+            StepVerifier.create(SolicitudeUtils.validateApproveRejectRequestedData(1,null,true))
+                    .expectError(StateNotFoundException.class)
+                    .verify();
+        }
+        @Test
+        void shouldFailWhenAcceptsManualIsFalseAndStateIsManual(){
+            StepVerifier.create(SolicitudeUtils.validateApproveRejectRequestedData(1,DefaultValues.MANUAL_STATE,false))
+                    .expectError(InvalidFieldException.class)
+                    .verify();
+        }
+        @Test
+        void shouldFailWhenStateIsPendingAndAcceptsManualIsTrue(){
+            StepVerifier.create(SolicitudeUtils.validateApproveRejectRequestedData(1,DefaultValues.PENDING_STATE,true))
+                    .expectError(InvalidFieldException.class)
+                    .verify();
+        }
+        @Test
+        void shouldFailWhenStateIsPendingAndAcceptsManualIsFalse(){
+            StepVerifier.create(SolicitudeUtils.validateApproveRejectRequestedData(1,DefaultValues.PENDING_STATE,false))
+                    .expectError(InvalidFieldException.class)
+                    .verify();
+        }
+        @Test
+        void shouldSuccessWhenStateIsRejected(){
+            StepVerifier.create(SolicitudeUtils.validateApproveRejectRequestedData(1,DefaultValues.REJECTED_STATE,false))
+                    .expectComplete()
+                    .verify();
+        }
+        @Test
+        void shouldSuccessWhenStateIsApproved(){
+            StepVerifier.create(SolicitudeUtils.validateApproveRejectRequestedData(1,DefaultValues.APPROVED_STATE,false))
+                    .expectComplete()
+                    .verify();
+        }
+        @Test
+        void shouldSuccessWhenStateIsManualAndAcceptsManualIsTrue(){
+            StepVerifier.create(SolicitudeUtils.validateApproveRejectRequestedData(1,DefaultValues.MANUAL_STATE,true))
+                    .expectComplete()
+                    .verify();
         }
     }
 }
