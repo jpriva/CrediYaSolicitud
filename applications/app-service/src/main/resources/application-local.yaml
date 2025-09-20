@@ -1,4 +1,9 @@
-# Configuration for local development using LocalStack
+spring:
+  flyway:
+    url: "jdbc:mysql://${SPRING_R2DBC_HOST:localhost}:${SPRING_R2DBC_PORT:3307}/${SPRING_R2DBC_DB:solicitudes_db}"
+    user: "${SPRING_DB_USERNAME:jpriva}"
+    password: "${SPRING_DB_PASSWORD:pass12345}"
+
 adapters:
   sqs:
     queues:
@@ -6,3 +11,13 @@ adapters:
       debt-capacity: "${ADAPTERS_SQS_ENDPOINT_OVERRIDE:http://localhost:4566}/000000000000/debt-capacity-queue"
       metric: "${ADAPTERS_SQS_ENDPOINT_OVERRIDE:http://localhost:4566}/000000000000/solicitude-report-queue"
     endpoint: "${ADAPTERS_SQS_ENDPOINT_OVERRIDE:http://localhost:4566}"
+  r2dbc:
+    host: "${SPRING_R2DBC_HOST:localhost}"
+    port: "${SPRING_R2DBC_PORT:3307}"
+    database: "${SPRING_R2DBC_DB:solicitudes_db}"
+    username: "${SPRING_DB_USERNAME:jpriva}"
+    password: "${SPRING_DB_PASSWORD:pass12345}"
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:iBdGbA8Dxowf12Zs7IYH91+KwKOg5yb39RGQv6pOWes=}

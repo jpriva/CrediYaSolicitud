@@ -53,6 +53,14 @@ public class WebSecurityConfig {
                                 ApiPathMatchers.TEST_MATCHER
                         ).permitAll()
                         .pathMatchers(
+                                ApiPathMatchers.HEALTH_CHECK_MATCHER
+                        ).permitAll()
+                        .pathMatchers(
+                                ApiPathMatchers.ACTUATOR_MATCHER
+                        ).hasAnyAuthority(
+                                ApiConstants.Role.SUPER_USER_ROLE_NAME
+                        )
+                        .pathMatchers(
                                 HttpMethod.POST, ApiPathMatchers.DEBT_CAPACITY_MATCHER
                         ).hasAnyAuthority(
                                 ApiConstants.Role.CALLBACK_ROLE
