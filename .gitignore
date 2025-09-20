@@ -334,3 +334,12 @@ gradle-app.setting
 # -----
 *.hprof
 build-cache
+
+# Environment variable files
+# --------------------------
+.env
+
+# Run configuration files
+# -----------------------
+.run/
+*.run.xml

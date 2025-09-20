@@ -1,13 +1,23 @@
 package co.com.pragma.config;
 
+import co.com.pragma.model.jwt.gateways.JwtProviderPort;
+import co.com.pragma.model.loantype.gateways.LoanTypeRepository;
+import co.com.pragma.model.logs.gateways.LoggerPort;
+import co.com.pragma.model.solicitude.gateways.SolicitudeRepository;
+import co.com.pragma.model.sqs.gateways.SQSPort;
+import co.com.pragma.model.state.gateways.StateRepository;
+import co.com.pragma.model.template.gateways.TemplatePort;
+import co.com.pragma.model.transaction.gateways.TransactionalPort;
+import co.com.pragma.model.user.gateways.UserPort;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class UseCasesConfigTest {
+class UseCasesConfigTest {
 
     @Test
     void testUseCaseBeansExist() {
@@ -31,14 +41,48 @@ public class UseCasesConfigTest {
     static class TestConfig {
 
         @Bean
-        public MyUseCase myUseCase() {
-            return new MyUseCase();
+        public SolicitudeRepository solicitudeRepository() {
+            return Mockito.mock(SolicitudeRepository.class);
         }
-    }
 
-    static class MyUseCase {
-        public String execute() {
-            return "MyUseCase Test";
+        @Bean
+        public LoanTypeRepository loanTypeRepository() {
+            return Mockito.mock(LoanTypeRepository.class);
+        }
+
+        @Bean
+        public StateRepository stateRepository() {
+            return Mockito.mock(StateRepository.class);
+        }
+
+        @Bean
+        public UserPort userPort() {
+            return Mockito.mock(UserPort.class);
+        }
+
+        @Bean
+        public LoggerPort loggerPort() {
+            return Mockito.mock(LoggerPort.class);
+        }
+
+        @Bean
+        public TransactionalPort transactionalPort() {
+            return Mockito.mock(TransactionalPort.class);
+        }
+
+        @Bean
+        public SQSPort sqsPort(){
+            return Mockito.mock(SQSPort.class);
+        }
+
+        @Bean
+        public TemplatePort templatePort(){
+            return Mockito.mock(TemplatePort.class);
+        }
+
+        @Bean
+        public JwtProviderPort jwtPort(){
+            return Mockito.mock(JwtProviderPort.class);
         }
     }
 }

@@ -1,12 +1,26 @@
 apply plugin: 'org.springframework.boot'
 
 dependencies {
+	implementation project(':mustache-template')
+	implementation project(':sqs-sender')
+	implementation project(':metrics')
+	implementation project(':jwt-adapter')
+	implementation project(':webclient')
+	implementation project(':reactive-web')
+	implementation project(':logger')
+	implementation project(':r2dbc-mysql')
     implementation project(':model')
     implementation project(':usecase')
     implementation 'org.springframework.boot:spring-boot-starter'
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
     testImplementation 'com.tngtech.archunit:archunit:1.4.1'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'org.springframework:spring-tx'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    //ObjectMapper
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
 }
 
 tasks.register('explodedJar', Copy) {
@@ -23,4 +37,3 @@ bootJar {
     // Sets output jar name
     archiveFileName = "${project.getParent().getName()}.${archiveExtension.get()}"
 }
-

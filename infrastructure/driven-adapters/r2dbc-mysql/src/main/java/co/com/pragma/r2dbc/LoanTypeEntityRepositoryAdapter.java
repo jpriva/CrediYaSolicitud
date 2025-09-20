@@ -1,0 +1,27 @@
+package co.com.pragma.r2dbc;
+
+import co.com.pragma.model.loantype.LoanType;
+import co.com.pragma.model.loantype.gateways.LoanTypeRepository;
+import co.com.pragma.r2dbc.mapper.PersistenceLoanTypeMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+@Repository
+@RequiredArgsConstructor
+public class LoanTypeEntityRepositoryAdapter implements LoanTypeRepository {
+    private final LoanTypeEntityRepository loanTypeRepository;
+    private final PersistenceLoanTypeMapper loanTypeMapper;
+
+    @Override
+    public Flux<LoanType> findAll() {
+        return loanTypeRepository.findAll()
+                .map(loanTypeMapper::toDomain);
+    }
+
+    @Override
+    public Mono<LoanType> findById(Integer loanTypeId) {
+        return loanTypeRepository.findById(loanTypeId).map(loanTypeMapper::toDomain);
+    }
+}
