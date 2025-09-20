@@ -1,0 +1,6 @@
+adapters:
+  sqs:
+    queues:
+      state-change: "${STATE_SQS_ENDPOINT_OVERRIDE:}"
+      debt-capacity: "${DEBT_SQS_ENDPOINT_OVERRIDE:}"
+      metric: "${METRIC_SQS_ENDPOINT_OVERRIDE:}"
