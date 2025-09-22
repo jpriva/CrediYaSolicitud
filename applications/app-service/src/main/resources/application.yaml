@@ -48,8 +48,6 @@ management:
     health:
       probes:
         enabled: true
-  server:
-    port: 9091
 
 cors:
   allowed-origins: "${CORS_ALLOWED_ORIGINS:http://localhost:4200,http://localhost:8082}"
