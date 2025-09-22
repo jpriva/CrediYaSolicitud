@@ -107,7 +107,7 @@ public class WebSecurityConfig {
                     return Mono.error(new InvalidCredentialsException());
                 }
             }
-            return Mono.error(new InvalidCredentialsException());
+            return Mono.empty();
         }
     }
 }
