@@ -58,8 +58,9 @@ springdoc:
       title: "Crediya Loan Application API Microservice"
       version: "1.0.0"
       description: "This is the API for Crediya Loan Application Microservice"
+    path: /solicitude/api-docs
   swagger-ui:
-    path: "/solicitude/swagger-ui.html"
+    path: /solicitude/swagger-ui.html
 security:
   jwt:
     secret: "${JWT_SECRET}"
