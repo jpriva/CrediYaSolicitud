@@ -31,11 +31,11 @@ public class ApiConstants {
         //PERMIT ALL
         public static final String LOAN_TYPE_MATCHER = ApiPath.LOAN_TYPE_PATH + "/**";
         public static final String STATE_MATCHER = ApiPath.STATE_PATH + "/**";
-        public static final String API_DOCS_MATCHER = "/v3/api-docs/**";
-        public static final String SWAGGER_UI_MATCHER = "/swagger-ui/**";
+        public static final String API_DOCS_MATCHER = "/solicitude/api-docs/**";
+        public static final String SWAGGER_UI_MATCHER = "/solicitude/swagger-ui/**";
         //SUPER_USER
-        public static final String ACTUATOR_MATCHER = "/actuator/**";
-        public static final String HEALTH_CHECK_MATCHER = "/actuator/health/**";
+        public static final String ACTUATOR_MATCHER = "/solicitude/actuator/**";
+        public static final String HEALTH_CHECK_MATCHER = "/solicitude/actuator/health/**";
         public static final String SOLICITUDE_MATCHER = ApiPath.SOLICITUDE_PATH + "/**";
         public static final String DEBT_CAPACITY_MATCHER = ApiPath.DEBT_CAPACITY_PATH + "/**";
         //ADMIN
