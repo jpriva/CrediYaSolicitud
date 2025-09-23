@@ -42,6 +42,7 @@ adapters:
 management:
   endpoints:
     web:
+      base-path: "/solicitude/actuator"
       exposure:
         include: "health,prometheus"
   endpoint:
@@ -54,11 +55,11 @@ cors:
 springdoc:
   api-docs:
     info:
-      title: "Crediya Auth API Microservice"
+      title: "Crediya Loan Application API Microservice"
       version: "1.0.0"
-      description: "This is the API for Crediya Auth Microservice"
+      description: "This is the API for Crediya Loan Application Microservice"
   swagger-ui:
-    path: "/swagger-ui.html"
+    path: "/solicitude/swagger-ui.html"
 security:
   jwt:
     secret: "${JWT_SECRET}"
