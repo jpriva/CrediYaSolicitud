@@ -2,6 +2,7 @@ package co.com.pragma.jwtadapter;
 
 import co.com.pragma.jwtadapter.config.JwtProperties;
 import co.com.pragma.model.jwt.JwtData;
+import co.com.pragma.model.logs.gateways.LoggerPort;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -25,34 +26,32 @@ class JwtProviderAdapterTest {
 
     private JwtProviderAdapter jwtProviderAdapter;
     private JwtProperties properties;
+    private LoggerPort logger;
 
     @BeforeEach
     void setUp() {
         properties = new JwtProperties();
-        properties.setSecret("VGhpcyBpcyBhIHZlcnkgc2VjdXJlIGFuZCBsb25nIHNlY3JldCBrZXkgZm9yIEpXVCBhdXRoZW50aWNhdGlvbg==");
+        properties.setCallbackSecret("VGhpcyBpcyBhIHZlcnkgc2VjdXJlIGFuZCBsb25nIHNlY3JldCBrZXkgZm9yIEpXVCBhdXRoZW50aWNhdGlvbg==");
         properties.setExpiration(3600L); // 1 hour
 
-        jwtProviderAdapter = new JwtProviderAdapter(properties);
+        jwtProviderAdapter = new JwtProviderAdapter(properties,logger);
 
     }
 
     @Test
     void getClaims_shouldParseValidToken() {
-        String token = generateTestToken("john.doe@example.com", "John Doe", "12345", "CLIENTE", 1, properties.getExpiration());
+        String token = generateTestToken("john.doe@example.com", "CLIENTE", properties.getExpiration());
 
         JwtData claims = jwtProviderAdapter.getClaims(token);
 
         assertThat(claims).isNotNull();
         assertThat(claims.subject()).isEqualTo("john.doe@example.com");
         assertThat(claims.role()).isEqualTo("CLIENTE");
-        assertThat(claims.roleId()).isEqualTo(1);
-        assertThat(claims.name()).isEqualTo("John Doe");
-        assertThat(claims.idNumber()).isEqualTo("12345");
     }
 
     @Test
     void getClaims_shouldThrowExceptionForInvalidSignature() {
-        String validToken = generateTestToken("user@test.com", "Test User", "111", "ADMIN", 2, properties.getExpiration());
+        String validToken = generateTestToken("user@test.com", "ADMIN", properties.getExpiration());
         String invalidToken = validToken.substring(0, validToken.lastIndexOf('.')) + ".invalidSignature";
 
         assertThatThrownBy(() -> jwtProviderAdapter.getClaims(invalidToken))
@@ -61,7 +60,7 @@ class JwtProviderAdapterTest {
 
     @Test
     void getClaims_shouldThrowExceptionForExpiredToken() {
-        String expiredToken = generateTestToken("user@test.com", "Test User", "111", "ADMIN", 2, 0L);
+        String expiredToken = generateTestToken("user@test.com", "ADMIN", 0L);
 
         await().atMost(Duration.ofSeconds(1)).untilAsserted(() ->
                 assertThatThrownBy(() -> jwtProviderAdapter.getClaims(expiredToken))
@@ -69,16 +68,13 @@ class JwtProviderAdapterTest {
         );
     }
 
-    private String generateTestToken(String subject, String name, String idNumber, String role, Integer roleId, long expirationSeconds) {
+    private String generateTestToken(String subject, String role, long expirationSeconds) {
         Map<String, Object> claims = new HashMap<>();
         if (role != null) {
             claims.put("role", role);
-            claims.put("roleId", roleId);
         }
-        claims.put("name", name);
-        claims.put("idNumber", idNumber);
 
-        byte[] keyBytes = Base64.getDecoder().decode(properties.getSecret());
+        byte[] keyBytes = Base64.getDecoder().decode(properties.getCallbackSecret());
         SecretKey key = Keys.hmacShaKeyFor(keyBytes);
 
         return Jwts.builder()

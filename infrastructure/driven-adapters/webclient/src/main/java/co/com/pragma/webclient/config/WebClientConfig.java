@@ -10,8 +10,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -51,13 +52,13 @@ public class WebClientConfig {
 
     private ExchangeFilterFunction addAuthHeaderFromContext() {
         return (clientRequest, next) -> ReactiveSecurityContextHolder.getContext()
-                .flatMap(context -> {
-                    Authentication authentication = context.getAuthentication();
+                .map(SecurityContext::getAuthentication)
+                .flatMap(authentication -> {
 
-                    if (authentication != null && authentication.getCredentials() instanceof String tokenValue && !tokenValue.isEmpty()) {
-
+                    if (authentication instanceof JwtAuthenticationToken jwtAuth) {
+                        String token = jwtAuth.getToken().getTokenValue();
                         ClientRequest filteredRequest = ClientRequest.from(clientRequest)
-                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenValue)
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .build();
 
                         return next.exchange(filteredRequest);

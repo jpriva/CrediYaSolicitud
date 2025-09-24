@@ -108,7 +108,7 @@ public class SolicitudeUseCase {
             logger.info("Generating pay plan notification for approved solicitude ID: {}", solicitude.getSolicitudeId());
             return Mono.fromCallable(() -> NotificationUtils.userPayPlan(solicitude))
                     .flatMap(context -> templatePort.process(EmailTemplate.PAY_PLAN.getTemplateName(), context))
-                    .doOnSuccess(body -> logger.info("Generated Pay Plan Email Body:\n{}", body))
+                    .doOnSuccess(body -> logger.debug("Generated Pay Plan Email Body:\n{}", body))
                     .map(body -> EmailMessage.builder().to(solicitude.getEmail()).subject(NotificationUtils.DEFAULT_PAY_PLAN).body(body).build());
         }
         logger.info("Generating standard state change notification for solicitude ID: {}", solicitude.getSolicitudeId());

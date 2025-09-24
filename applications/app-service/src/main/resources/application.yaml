@@ -15,7 +15,13 @@ spring:
     enabled: true
   output:
     ansi:
-      enabled: "ALWAYS"
+      enabled: DETECT
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${SECURITY_PUBLIC_KEY_URI}
+
 adapters:
   r2dbc:
     host: "${SPRING_R2DBC_HOST:localhost}"
@@ -63,5 +69,5 @@ springdoc:
     path: /solicitude/swagger-ui.html
 security:
   jwt:
-    secret: "${JWT_SECRET}"
+    callback-secret: "${JWT_SECRET:}"
     expiration: 3600
