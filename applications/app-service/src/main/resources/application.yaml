@@ -15,7 +15,7 @@ spring:
     enabled: true
   output:
     ansi:
-      enabled: "ALWAYS"
+      enabled: DETECT
 adapters:
   r2dbc:
     host: "${SPRING_R2DBC_HOST:localhost}"
